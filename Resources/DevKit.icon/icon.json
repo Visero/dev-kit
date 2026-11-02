@@ -1,0 +1,17 @@
+{
+  "fill": "automatic",
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "DevKit-glyph.png",
+          "name": "DevKit braces"
+        }
+      ],
+      "name": "DevKit",
+      "shadow": { "kind": "neutral", "opacity": 0.3 },
+      "specular": true
+    }
+  ],
+  "supported-platforms": { "squares": ["macOS"] }
+}
