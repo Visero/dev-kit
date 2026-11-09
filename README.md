@@ -4,7 +4,7 @@
 
 ## 运行
 
-解压 `DevKit-1.6.1-macOS-arm64.zip`，双击其中的 `DevKit.app`。也可将它拖到「应用程序」。构建目标为 Apple Silicon（arm64）、macOS 14 及以上；当前开发环境为 macOS 27.0.1。未在 Intel Mac 或更早 macOS 版本上实测。
+解压 `DevKit-1.6.2-macOS-arm64.zip`，双击其中的 `DevKit.app`。也可将它拖到「应用程序」。构建目标为 Apple Silicon（arm64）、macOS 14 及以上；当前开发环境为 macOS 27.0.1。未在 Intel Mac 或更早 macOS 版本上实测。
 
 应用使用本地 ad-hoc 签名，没有 Apple Developer ID 签名及公证。如果下载后被系统阻止，请在确认文件来源后，使用系统「隐私与安全性」中的「仍要打开」。不要关闭系统安全机制。
 
@@ -138,7 +138,7 @@ web 与 native 引擎均已按各自 `manifest.json` 与许可证文件核对（
 ```bash
 bash test.sh            # 运行核心与原生回归测试
 bash build.sh           # 编译、内嵌引擎、ad-hoc 签名并验证，输出 build/DevKit.app
-bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.1-macOS-arm64.zip 与 DevKit-1.6.1-source.zip
+bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.2-macOS-arm64.zip 与 DevKit-1.6.2-source.zip
 ```
 
 构建流程：先在临时暂存目录编译，递归复制 `Resources/Formatters/web` 与 `native`，对内嵌的每一个 Mach-O 二进制/动态库逐一 ad-hoc 签名，再签名外层应用并做 `codesign --verify --strict --deep` 严格验证；全部通过后才把成品移到 `build/DevKit.app`，已有包保留在 `build/.previous.*`，不会原地覆盖正在运行的已签名应用。打包模式拒绝覆盖已存在的旧 zip。
@@ -158,6 +158,12 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.1-macO
 - `Tests/NativeTests.swift`：原生文本控件、配色及窗口尺寸断言
 
 ## 当前验证状态
+
+### 1.6.2 本轮
+
+- 「代码 Diff」页按比较前后两种状态布局：未比较时只有左右两个输入框，撑满控制条到窗口底的全部高度，底部不再固定占一块结果面板；「开始比较」按钮移到工具栏最右侧并加大加粗，无输入时禁用。
+- 比较完成后输入框折叠为一行摘要（原始/修改各多少行），差异结果独占整页；工具栏保留「展开输入 / 重新比较」，展开时输入占约 36% 高度、结果仍在下方，任一侧改动即回到编辑态。
+- 页面外边距与格式化页对齐（顶部 16、标题下 12、内容底 14）。`swiftc -O` 整包编译通过，窗口内实测未比较、已比较、展开输入三种状态。
 
 ### 1.6.1 本轮
 

@@ -129,9 +129,11 @@ struct EditorPanel: View {
                 Spacer()
                 Text(badge).font(.system(size:10,design:.monospaced)).foregroundStyle(.secondary)
                 if !editable { CopyButton(text:text).buttonStyle(.borderless).font(.system(size:11)) }
-            }.padding(.horizontal,14).padding(.vertical,12)
+            }.padding(.horizontal,14).padding(.vertical,9)
             Divider()
-            CodeEditor(text:$text,editable:editable,label:title,language:language).clipShape(UnevenRoundedRectangle(bottomLeadingRadius:16,bottomTrailingRadius:16))
+            CodeEditor(text:$text,editable:editable,label:title,language:language)
+                .frame(maxHeight:.infinity)
+                .clipShape(UnevenRoundedRectangle(bottomLeadingRadius:16,bottomTrailingRadius:16))
         }
     }
 }

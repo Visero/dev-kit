@@ -391,6 +391,8 @@ final class RootUIState: ObservableObject {
 struct RootView: View {
     @ObservedObject var store: ToolkitStore
     @StateObject private var ui = RootUIState()
+    /// Editor-first pages keep the chrome tight so the content area gets the space.
+    private var compactDetailTop: Bool { store.page == .diff || store.page == .json }
     var body: some View {
         NavigationSplitView {
             VStack(alignment:.leading,spacing:24) {
@@ -467,7 +469,7 @@ struct RootView: View {
                         Image(systemName:"sun.max").tag("light")
                         Image(systemName:"moon").tag("dark")
                     }.pickerStyle(.segmented).labelsHidden().frame(width:120).help("外观：跟随系统 / 浅色 / 深色")
-                }.padding(.horizontal,28).padding(.top,store.page == .json ? 16 : 32).padding(.bottom,store.page == .json ? 12 : 22)
+                }.padding(.horizontal,28).padding(.top,compactDetailTop ? 16 : 32).padding(.bottom,compactDetailTop ? 12 : 22)
                 Group {
                     switch store.page {
                     case .diff: DiffPage(store:store)
@@ -476,7 +478,7 @@ struct RootView: View {
                     case .reader: CodeReaderPage(manager:CodeReaderManager.shared)
                     case .clock: ClockPage(store:store)
                     }
-                }.padding(.horizontal,28).padding(.bottom,store.page == .json ? 14 : 24)
+                }.padding(.horizontal,28).padding(.bottom,compactDetailTop ? 14 : 24)
             }.background(Color(nsColor:.windowBackgroundColor))
         }.tint(.teal)
         .sheet(isPresented:$ui.syncSheet) { SyncSheet(engine:store.sync) }
