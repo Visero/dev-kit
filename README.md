@@ -4,7 +4,7 @@
 
 ## 运行
 
-解压 `DevKit-1.6.3-macOS-arm64.zip`，双击其中的 `DevKit.app`。也可将它拖到「应用程序」。构建目标为 Apple Silicon（arm64）、macOS 14 及以上；当前开发环境为 macOS 27.0.1。未在 Intel Mac 或更早 macOS 版本上实测。
+解压 `DevKit-1.6.4-macOS-arm64.zip`，双击其中的 `DevKit.app`。也可将它拖到「应用程序」。构建目标为 Apple Silicon（arm64）、macOS 14 及以上；当前开发环境为 macOS 27.0.1。未在 Intel Mac 或更早 macOS 版本上实测。
 
 应用使用本地 ad-hoc 签名，没有 Apple Developer ID 签名及公证。如果下载后被系统阻止，请在确认文件来源后，使用系统「隐私与安全性」中的「仍要打开」。不要关闭系统安全机制。
 
@@ -154,7 +154,7 @@ web 与 native 引擎均已按各自 `manifest.json` 与许可证文件核对（
 ```bash
 bash test.sh            # 运行核心与原生回归测试
 bash build.sh           # 编译、内嵌引擎、ad-hoc 签名并验证，输出 build/DevKit.app
-bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.3-macOS-arm64.zip 与 DevKit-1.6.3-source.zip
+bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.4-macOS-arm64.zip 与 DevKit-1.6.4-source.zip
 ```
 
 构建流程：先在临时暂存目录编译，递归复制 `Resources/Formatters/web` 与 `native`，对内嵌的每一个 Mach-O 二进制/动态库逐一 ad-hoc 签名，再签名外层应用并做 `codesign --verify --strict --deep` 严格验证；全部通过后才把成品移到 `build/DevKit.app`，已有包保留在 `build/.previous.*`，不会原地覆盖正在运行的已签名应用。打包模式拒绝覆盖已存在的旧 zip。
@@ -177,7 +177,14 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.3-macO
 
 ## 当前验证状态
 
-### 1.6.3 本轮
+### 1.6.4 本轮
+
+- 只做体积治理，功能与行为不变：内置的格式化引擎先 `strip -x` 去掉本地符号，再删掉 JRE 里仅编译期使用的 `ct.sym`。引擎二进制在打包时由 `build.sh` 统一重新 ad-hoc 签名，`codesign --verify --strict --deep` 通过。
+- `DevKit.app` 476 MB → 399 MB；发行 zip 177 MB → 160 MB，源码 zip 289 MB → 273 MB。
+- 逐个复核成品包内的引擎：ruff、gofmt、swift-format、rustfmt、clang-format-safe、shfmt-safe 六个原生引擎格式化正常；javascript / typescript / html / css / java / sql 六个 web 语言（node 与 JRE 路径）格式化正常。`bash test.sh` 656 项断言全绿。
+- 仍完整的最大项是 Rust 引擎：`rustfmt` 依赖 `librustc_driver`（79 MB）与 `libLLVM`（136 MB），合计约 220 MB，占整包一半以上；要再瘦身只能去掉 Rust 格式化，属于功能取舍，本版没有动。
+
+### 1.6.3 历史
 
 - 「常用代码格式默认用 DevKit 打开」改为 24 个独立开关，`LazyVGrid` 三列、严格字母顺序（c → cpp → css … xml → yaml → yml），默认全关，不含 `.txt`。任何一次点击只动一项，不会再出现一次改 24 项、系统连弹几十个确认框的情况。
 - 开关位不再读本机偏好，而是每项用 `LSCopyDefaultRoleHandlerForContentType(..., .editor)` 读系统真相；页面出现、切回前台、以及每 2 秒各刷新一次，因此系统拒绝更改、确认框关得晚时，开关会自动落回实际状态并清掉过期提示。
@@ -201,7 +208,7 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.3-macO
 - 现场验证：在运行中的窗口里点击行内空白处（标题与 ⌘2/⌘3 之间、圆角块最左侧）均正常切换；截图确认标题贴顶、编辑器铺到底部说明行。类型检查与整包构建通过。
 - 仓库不含第三方格式化引擎二进制（`Resources/Formatters/`、`ThirdPartySources/` 体积数百 MB，且含超过 GitHub 单文件 100 MB 限制的 dylib/node），完整引擎随发行 zip 分发。
 
-### 1.6.0 本轮
+### 1.6.0 历史
 
 - 原生代码阅读器入口和独立代码窗口；最多5条本地最近文件、按路径去重、已打开文件只聚焦不重载；代码区显示源文件行号及词法高亮，保留每周倒计时与现有工具。
 - 文件正文不写入代码草稿或笔记、不参与 DevKit 同步。可编辑、⌘S 手动保存；原 UTF 编码/BOM/换行保留，外部修改拒绝覆盖；备用文件处理器声明不改变用户默认应用。
