@@ -241,7 +241,12 @@ struct NativeFormatterEngineTests {
         }
 
         // ---------- Rust (rustfmt) ----------
-        do {
+        // ---------- Rust (rustfmt) ----------
+        // Rust formatting is not shipped: rustc_driver + LLVM dylibs alone cost
+        // ~220 MB, so the engine lives outside the bundle. The assertions run
+        // only when a local copy of the engine is present.
+        let rustEngine = root.appendingPathComponent("bin/rustfmt-safe")
+        if FileManager.default.isExecutableFile(atPath: rustEngine.path) {
             let (out, err, code) = runFormatter(
                 exec: "bin/rustfmt-safe", args: ["--edition", "2024"],
                 input: "fn main(){let x=1;println!(\"{}\",x)}\n", root: root

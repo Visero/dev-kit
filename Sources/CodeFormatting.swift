@@ -14,7 +14,9 @@ enum FormatError: LocalizedError, Sendable {
         case .timeout: return "格式化超时（5 秒），已取消以保护输入。"
         case .engineNotFound(let l): return "未找到 \(l) 的格式化引擎。"
         case .engineFailed(let m): return "格式化失败：\(m)"
-        case .noEngineAvailable(let l): return "\(l.rawValue) 暂无格式化引擎，保留原文。"
+        case .noEngineAvailable(let l):
+            if l == .rust { return "Rust 格式化引擎未随本版安装包分发，保留原文；其余语言不受影响。" }
+            return "\(l.rawValue) 暂无格式化引擎，保留原文。"
         case .invalidManifest(let m): return "格式化配置无效：\(m)"
         case .illegalExecutablePath(let p): return "引擎路径越界：\(p)"
         }

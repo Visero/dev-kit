@@ -9,8 +9,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 OUT="$ROOT/build"
-VERSION="1.6.4"
-BUILD="14"
+VERSION="1.6.5"
+BUILD="15"
 ARCH="arm64"
 TARGET="arm64-apple-macosx14.0"
 
@@ -107,7 +107,9 @@ if [[ "${1:-}" == "package" ]]; then
   rsync -a --exclude '.DS_Store' "$ROOT/Resources/" "$DST/Resources/"
   if [[ -d "$ROOT/ThirdPartySources" ]]; then
     mkdir -p "$DST/ThirdPartySources"
-    rsync -a "$ROOT/ThirdPartySources/" "$DST/ThirdPartySources/"
+    # rustfmt-engine is a local-only stash (~220 MB, deliberately not shipped);
+    # keep it out of the source archive so downloads stay small.
+    rsync -a --exclude 'rustfmt-engine' "$ROOT/ThirdPartySources/" "$DST/ThirdPartySources/"
   fi
   (cd "$SRC" && COPYFILE_DISABLE=1 zip -r -X -y -q "$SRC_ZIP" DevKit)
 

@@ -106,6 +106,23 @@ struct CodeFormattingTests {
         check("timeout is 5s", CodeFormatEngine.timeoutSeconds == 5.0)
         check("output cap 4MB", CodeFormatEngine.maxOutputBytes == 4_000_000)
 
+        // MARK: - Languages without a bundled engine
+        // Rust formatting is not shipped (its dylibs were ~220 MB). The UI must
+        // explain that instead of silently doing nothing or blaming the file.
+        if CodeFormatEngine.manifest(forBundleName: "native") != nil,
+           CodeFormatEngine.engine(for: .rust) == nil {
+            do {
+                _ = try CodeFormatEngine.format("fn main(){}\n", language: .rust)
+                check("rust without engine throws", false)
+            } catch let error as FormatError {
+                let text = error.errorDescription ?? ""
+                check("rust without engine throws", true)
+                check("rust message names the missing engine", text.contains("Rust"))
+                check("rust message says it is not bundled", text.contains("未随本版安装包分发"))
+                check("rust message says other languages still work", text.contains("其余语言不受影响"))
+            }
+        }
+
         print("PASS: \(passed) code formatting assertions")
     }
 }

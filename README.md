@@ -4,7 +4,7 @@
 
 ## 运行
 
-解压 `DevKit-1.6.4-macOS-arm64.zip`，双击其中的 `DevKit.app`。也可将它拖到「应用程序」。构建目标为 Apple Silicon（arm64）、macOS 14 及以上；当前开发环境为 macOS 27.0.1。未在 Intel Mac 或更早 macOS 版本上实测。
+解压 `DevKit-1.6.5-macOS-arm64.zip`，双击其中的 `DevKit.app`。也可将它拖到「应用程序」。构建目标为 Apple Silicon（arm64）、macOS 14 及以上；当前开发环境为 macOS 27.0.1。未在 Intel Mac 或更早 macOS 版本上实测。
 
 应用使用本地 ad-hoc 签名，没有 Apple Developer ID 签名及公证。如果下载后被系统阻止，请在确认文件来源后，使用系统「隐私与安全性」中的「仍要打开」。不要关闭系统安全机制。
 
@@ -99,7 +99,7 @@ UTC+0 / UTC+8 双时钟仍等宽等高；下班设置在 1.5.1 扩展为逐星�
 - **离线自包含**：所有引擎随应用内嵌于 `Contents/Resources/Formatters/`（web 运行时与 native 二进制两类），不调用系统 PATH 上的同名工具，不要求预装任何语言工具链，也不需要联网下载任何包。
 - **不执行、不上传**：格式化只在本机跑引擎，不读取你磁盘上的项目文件、不执行代码、不联网、不发送任何内容；源码经 stdin/stdout 管道进出，不落临时文件。
 
-### 14 种语言范围与引擎
+### 13 种语言范围与引擎
 
 web 与 native 引擎均已按各自 `manifest.json` 与许可证文件核对（web 另含 `THIRD_PARTY_NOTICES.txt`）。引擎调用统一契约：stdin 传入源码，成功时 stdout 仅输出格式化后文本，诊断走 stderr；任何语法/格式错误非零退出且 stdout 为空（应用据此保留原文）。
 
@@ -118,11 +118,12 @@ web 与 native 引擎均已按各自 `manifest.json` 与许可证文件核对（
 | 11 | C | clang-format-safe 18.1.8（LLVM 风格） | native | **不是 C 解析器或编译器**：wrapper 先做 raw-aware 词法 preflight 与括号/引号/块注释计数守恒——未闭合引号、块注释、括号会拒绝（exit 3、stdout 为空、保留原文）；但括号平衡的非法语法（如 `int x = ;`）仍可能被照常格式化，应用不保证对这类输入做完整编译级拦截 |
 | 12 | C++ | clang-format-safe 18.1.8（LLVM 风格） | native | 同 C；原始字符串 `R"(...)"`、`R"#(...)#"` 与宏字符串续行经 raw-aware 处理后验证可格式化，未闭合词法单元同样拒绝 |
 | 13 | Shell | shfmt-safe v3.11.0 | native | 空白缩进字符串内部转数字 `-i`（空格→数量，tab→0）；固定 `-ln bash`，不读 editorconfig；heredoc 分隔符不匹配会被拒绝 |
-| 14 | Rust | rustfmt-safe 1.10.0（--edition 2024） | native | stderr 含 `error:` 时即使 exit 0 也拒绝输出（exit 4），普通 warning 放行；内嵌 librustc_driver 与 libLLVM dylib（约 220 MB） |
+
+Rust 的格式化引擎（rustfmt 连同它依赖的 librustc_driver 与 libLLVM，约 220 MB）不随本版安装包分发：在格式化页对 `.rs` 会提示「未随本版安装包分发，保留原文」，不替换你的代码；Rust 的语法高亮、语言检测与代码阅读不受影响，其余 13 种语言的格式化也照常可用。
 
 运行时隔离：web 仅使用内嵌 node v24.22.2（单文件，117 MB；该 Node 自身运行要求 macOS 13.5+，本应用目标为 macOS 14，满足）与 jlink OpenJDK 21（65 MB，内嵌 libjli），不依赖系统 Node/npm/JDK，无网络、无遥测、不执行用户输入代码。缩进参数为实际空白字符串：2 空格 / 4 空格 / tab；Google-java-format 的 Google 风格为 2 空格，缩进 4 映射 --aosp，其他值回退 Google 风格。
 
-共同能力边界：只调整缩进、换行、空格与括号位置，**不改变代码语义**；不做 import 整理、不补全、不修语法错误；不分析整个依赖树；按单文件片段处理，不读取项目级配置文件。引擎协议补充：wrapper 输出超 2 MB 时以 exit 5 拒绝；应用侧对引擎 stdout 总量超过 4 MB 会抛错并保留原文，不会把截断内容写回。超出上表 14 种的语言只能在 Diff 等页面查看或语法高亮，不提供格式化引擎。
+共同能力边界：只调整缩进、换行、空格与括号位置，**不改变代码语义**；不做 import 整理、不补全、不修语法错误；不分析整个依赖树；按单文件片段处理，不读取项目级配置文件。引擎协议补充：wrapper 输出超 2 MB 时以 exit 5 拒绝；应用侧对引擎 stdout 总量超过 4 MB 会抛错并保留原文，不会把截断内容写回。超出上表 13 种的语言只能在 Diff 等页面查看或语法高亮，不提供格式化引擎。
 
 ## 代码高亮与窗口（1.2.0 沿用）
 
@@ -154,7 +155,7 @@ web 与 native 引擎均已按各自 `manifest.json` 与许可证文件核对（
 ```bash
 bash test.sh            # 运行核心与原生回归测试
 bash build.sh           # 编译、内嵌引擎、ad-hoc 签名并验证，输出 build/DevKit.app
-bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.4-macOS-arm64.zip 与 DevKit-1.6.4-source.zip
+bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.5-macOS-arm64.zip 与 DevKit-1.6.5-source.zip
 ```
 
 构建流程：先在临时暂存目录编译，递归复制 `Resources/Formatters/web` 与 `native`，对内嵌的每一个 Mach-O 二进制/动态库逐一 ad-hoc 签名，再签名外层应用并做 `codesign --verify --strict --deep` 严格验证；全部通过后才把成品移到 `build/DevKit.app`，已有包保留在 `build/.previous.*`，不会原地覆盖正在运行的已签名应用。打包模式拒绝覆盖已存在的旧 zip。
@@ -177,7 +178,15 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.4-macO
 
 ## 当前验证状态
 
-### 1.6.4 本轮
+### 1.6.5 本轮
+
+- 去掉 Rust 格式化：`rustfmt` 本身很小，但它拉着 `librustc_driver`（79 MB）与 `libLLVM`（136 MB）一起走，合计约 220 MB，占整包一半以上。这三样已从安装包移出，`manifest.json` 里不再有 `rust` 引擎条目。
+- 对 `.rs` 的表现为：格式化页提示「Rust 格式化引擎未随本版安装包分发，保留原文；其余语言不受影响。」，代码高亮、语言检测、阅读器都不变。
+- `DevKit.app` 399 MB → 207 MB；发行 zip 160 MB → 97 MB，源码 zip 273 MB → 208 MB（源码包同样排除这份本地留档）。
+- 复核：成品包内 ruff、gofmt、swift-format、clang-format-safe、shfmt-safe 与 javascript / typescript / html / css / java / sql（node 与 JRE）逐个实跑正常；`bash test.sh` 660 项断言全绿（较 1.6.4 的 656 项新增 4 条），其中这 4 条专门验证 `.rs` 的提示文案。
+- Rust 引擎留在仓库外的 `ThirdPartySources/rustfmt-engine/`（该目录被 `.gitignore` 忽略，也不进任何 zip），将来要恢复格式化直接搬回 `Resources/Formatters/native/{bin,lib}` 并补回 manifest 条目即可。
+
+### 1.6.4 历史
 
 - 只做体积治理，功能与行为不变：内置的格式化引擎先 `strip -x` 去掉本地符号，再删掉 JRE 里仅编译期使用的 `ct.sym`。引擎二进制在打包时由 `build.sh` 统一重新 ad-hoc 签名，`codesign --verify --strict --deep` 通过。
 - `DevKit.app` 476 MB → 399 MB；发行 zip 177 MB → 160 MB，源码 zip 289 MB → 273 MB。
