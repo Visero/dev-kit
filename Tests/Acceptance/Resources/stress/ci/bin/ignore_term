@@ -1,0 +1,4 @@
+#!/bin/bash
+# Ignore SIGTERM. Tests that watchdog's terminate() is followed by SIGKILL.
+trap '' TERM
+sleep 30

@@ -1,0 +1,78 @@
+// PersistenceRunner.swift.tmpl
+//
+// 等 UI 在 Sources/ 暴露 CodeDraftStore（或等价物）后，复制为
+//   Tests/Acceptance/PersistenceRunner.swift
+// 并填充 TODO 块。本文件不修改 Sources。
+//
+// 编译：
+//   xcrun swiftc -swift-version 5 -O \
+//     Sources/ToolCore.swift Sources/SyntaxCore.swift Sources/CodeFormatting.swift \
+//     Tests/Acceptance/PersistenceRunner.swift \
+//     -o build/persistence-tests
+
+import Foundation
+import CryptoKit
+
+@main
+struct PersistenceRunner {
+    // TODO: 把 bundle id 与草稿路径与 UI 实现对齐。
+    // 正式与预览必须是两个独立位置。
+    enum BundleID {
+        static let `official` = "com.visero.devkit"
+        static let preview    = "com.visero.devkit.preview"
+    }
+
+    static func draftURL(for bundle: String) -> URL {
+        ApplicationSupportDirectory()
+            .appendingPathComponent(bundle, isDirectory: true)
+            .appendingPathComponent("CodeDraft.json")
+    }
+
+    static func ApplicationSupportDirectory() -> URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+    }
+
+    static func sha256(_ s: String) -> String {
+        SHA256.hash(data: Data(s.utf8)).map { String(format:"%02x",$0) }.joined()
+    }
+
+    static func main() throws {
+        var passed = 0, failed = 0
+        func check(_ name: String, _ cond: Bool, _ detail: String = "") {
+            if cond { passed += 1; print("PASS: \(name)") }
+            else { failed += 1; print("FAIL: \(name) \(detail)") }
+        }
+
+        // ---- P7: 草稿文件权限 0600（等 UI 写过一次后才能测）----
+        let previewURL = draftURL(for: BundleID.preview)
+        if FileManager.default.fileExists(atPath: previewURL.path) {
+            let attrs = try FileManager.default.attributesOfItem(atPath: previewURL.path)
+            let perms = (attrs[.posixPermissions] as? Int) ?? 0
+            check("P7 preview draft is 0600", perms == 0o600, "got \(String(perms, radix: 8))")
+        } else {
+            print("SKIP: preview draft not yet written (\(previewURL.path))")
+        }
+
+        // ---- B1: 正式草稿不被预览覆盖（mtime 对比）----
+        // 由外层 shell 在跑 preview 前后对比 mtime；这里只做存在性检查。
+        let officialURL = draftURL(for: BundleID.official)
+        print("official draft: \(officialURL.path) exists=\(FileManager.default.fileExists(atPath: officialURL.path))")
+
+        // ---- P6: 损坏 JSON 不应崩、不应清空当前会话 ----
+        // TODO: 等 UI 暴露 CodeDraftStore.load() 后，写入一段损坏 JSON，
+        // 调用 load()，断言返回 nil / 默认空，但不抛 fatalError。
+        check("P6 placeholder", true, "TODO: wire once CodeDraftStore.load is exposed")
+
+        // ---- P1/P2/P3/P4: 由 UI 实机 GUI 跑完后，用 sha256 对比草稿文件与样本 ----
+        // 这里只列样本清单；GUI 步骤见 PERSISTENCE_ACCEPTANCE.md。
+        let samplesDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .appendingPathComponent("Samples/error")
+        let badSamples = (try? FileManager.default.contentsOfDirectory(atPath: samplesDir.path)) ?? []
+        print("error samples available: \(badSamples.count)")
+
+        print("")
+        print("== persistence runner summary: PASS=\(passed) FAIL=\(failed) ==")
+        if failed > 0 { exit(2) }
+    }
+}

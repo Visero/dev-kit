@@ -1,5 +1,6 @@
 # Build outputs
 build/
+.build/
 *.app/
 *.zip
 
@@ -8,3 +9,12 @@ build/
 
 # Editor
 *.swp
+
+# Vendored third-party engines (hundreds of MB; several binaries exceed
+# GitHub's 100 MB per-file limit). Release zips bundle them; a checkout
+# without these still builds the app, formatting engines are just absent.
+Resources/Formatters/
+ThirdPartySources/
+
+# Stray download scratch files
+ziJeQ15H

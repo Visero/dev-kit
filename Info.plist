@@ -6,12 +6,19 @@
 <key>CFBundleIdentifier</key><string>com.visero.devkit</string>
 <key>CFBundleExecutable</key><string>DevKit</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.1.1</string>
-<key>CFBundleVersion</key><string>3</string>
+<key>CFBundleShortVersionString</key><string>1.6.1</string>
+<key>CFBundleVersion</key><string>11</string>
 <key>CFBundleIconFile</key><string>DevKit</string>
 <key>CFBundleIconName</key><string>DevKit</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSPrincipalClass</key><string>NSApplication</string>
+<key>CFBundleDocumentTypes</key><array><dict>
+<key>CFBundleTypeName</key><string>Code text</string>
+<key>CFBundleTypeRole</key><string>Editor</string>
+<key>LSHandlerRank</key><string>Alternate</string>
+<key>LSItemContentTypes</key><array><string>public.plain-text</string><string>public.source-code</string><string>public.json</string><string>public.xml</string><string>public.html</string><string>public.shell-script</string></array>
+<key>CFBundleTypeExtensions</key><array><string>swift</string><string>js</string><string>jsx</string><string>ts</string><string>tsx</string><string>json</string><string>py</string><string>go</string><string>rs</string><string>java</string><string>c</string><string>cpp</string><string>h</string><string>hpp</string><string>m</string><string>mm</string><string>html</string><string>css</string><string>sql</string><string>sh</string><string>txt</string><string>md</string><string>yaml</string><string>yml</string><string>toml</string><string>xml</string></array>
+</dict></array>
 <key>NSHumanReadableCopyright</key><string>DevKit · Local developer tools</string>
 </dict></plist>

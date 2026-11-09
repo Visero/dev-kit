@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "engines": [
+    { "language": "javascript", "executable": "Formatters/stress/ci/bin/big_stderr",      "arguments": [] },
+    { "language": "typescript",  "executable": "Formatters/stress/ci/bin/no_stdin_read",   "arguments": [] },
+    { "language": "python",     "executable": "Formatters/stress/ci/bin/ignore_term",      "arguments": [] },
+    { "language": "go",         "executable": "Formatters/stress/ci/bin/fast_exit",       "arguments": [] }
+  ]
+}

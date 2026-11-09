@@ -30,11 +30,15 @@ struct CodeEditor: NSViewRepresentable {
     @Binding var text: String
     var editable=true
     var label: String
+    var language: CodeLanguage = .automatic
+    /// Called once when the text view is ready; gives access to the coordinator for programmatic replacement.
+    var onReady: ((Coordinator) -> Void)?
+    @Environment(\.colorScheme) private var scheme
     func makeCoordinator() -> Coordinator { Coordinator(self) }
     func makeNSView(context: Context) -> NSScrollView {
         let scroll=NSScrollView()
         scroll.hasVerticalScroller=true;scroll.hasHorizontalScroller=true;scroll.borderType = .noBorder;scroll.drawsBackground=false
-        let view=NSTextView(frame:.zero)
+        let view=HighlightTextView(frame:.zero)
         view.isRichText=false;view.isEditable=editable;view.isSelectable=true;view.allowsUndo=true
         view.font = .monospacedSystemFont(ofSize:13,weight:.regular)
         view.textColor = .labelColor;view.backgroundColor = .textBackgroundColor
@@ -49,18 +53,67 @@ struct CodeEditor: NSViewRepresentable {
         view.setAccessibilityLabel(label)
         view.delegate=context.coordinator;view.string=text
         scroll.documentView=view
+        context.coordinator.textView=view
+        view.themeChanged = { [weak coordinator=context.coordinator,weak view] in
+            if let view=view { coordinator?.schedule(view) }
+        }
+        context.coordinator.schedule(view)
+        onReady?(context.coordinator)
         return scroll
     }
     func updateNSView(_ scroll: NSScrollView,context: Context) {
         guard let view=scroll.documentView as? NSTextView else { return }
+        let previous=context.coordinator.parent
         context.coordinator.parent=self
-        if view.string != text { view.string=text }
+        // If the text was changed programmatically through performReplacement, the
+        // binding already matches the view string; skip the reset path.
+        let changed=view.string != text
+        if changed { view.string=text }
         view.isEditable=editable
+        if changed || previous.language != language || previous.scheme != scheme {
+            context.coordinator.schedule(view)
+        }
     }
     class Coordinator: NSObject,NSTextViewDelegate {
         var parent: CodeEditor
+        weak var textView: HighlightTextView?
+        var generation=UUID()
+        var pending:DispatchWorkItem?
         init(_ parent: CodeEditor) { self.parent=parent }
-        func textDidChange(_ notification: Notification) { if let view=notification.object as? NSTextView { parent.text=view.string } }
+        deinit { pending?.cancel() }
+        func textDidChange(_ notification: Notification) {
+            if let view=notification.object as? NSTextView { parent.text=view.string;schedule(view) }
+        }
+        /// Replace the entire text buffer through NSTextView's undo manager.
+        /// This registers a single undoable action without breaking the user's typing chain.
+        func performReplacement(_ newText: String) {
+            guard let view=textView else { return }
+            let fullRange=NSRange(location:0,length:(view.string as NSString).length)
+            view.shouldChangeText(in:fullRange,replacementString:newText)
+            view.replaceCharacters(in:fullRange,with:newText)
+            view.didChangeText()
+            parent.text=newText
+            schedule(view)
+        }
+        func schedule(_ view:NSTextView) {
+            generation=UUID();pending?.cancel()
+            // Never modify marked text while an IME is composing.
+            guard !view.hasMarkedText() else { return }
+            let id=generation, source=view.string, language=parent.language, dark=parent.scheme == .dark
+            let work=DispatchWorkItem { [weak self,weak view] in
+                let tokens=SyntaxLexer.spans(source,language:language)
+                DispatchQueue.main.async { [weak self,weak view] in
+                    guard let self=self,let view=view,self.generation==id,view.string==source,!view.hasMarkedText(),let layout=view.layoutManager else { return }
+                    // Temporary layout colors preserve plain-text copying, undo and caret.
+                    let entire=NSRange(location:0,length:(source as NSString).length)
+                    layout.removeTemporaryAttribute(.foregroundColor,forCharacterRange:entire)
+                    for token in tokens { layout.addTemporaryAttribute(.foregroundColor,value:SyntaxStyle.color(token.kind,dark:dark),forCharacterRange:token.range) }
+                    view.needsDisplay=true
+                }
+            }
+            pending=work
+            DispatchQueue.global(qos:.userInitiated).asyncAfter(deadline:.now()+0.12,execute:work)
+        }
     }
 }
 struct EditorPanel: View {
@@ -68,6 +121,7 @@ struct EditorPanel: View {
     let badge: String
     @Binding var text: String
     var editable=true
+    var language: CodeLanguage = .automatic
     var body: some View {
         Panel {
             HStack {
@@ -77,7 +131,7 @@ struct EditorPanel: View {
                 if !editable { CopyButton(text:text).buttonStyle(.borderless).font(.system(size:11)) }
             }.padding(.horizontal,14).padding(.vertical,12)
             Divider()
-            CodeEditor(text:$text,editable:editable,label:title).clipShape(UnevenRoundedRectangle(bottomLeadingRadius:16,bottomTrailingRadius:16))
+            CodeEditor(text:$text,editable:editable,label:title,language:language).clipShape(UnevenRoundedRectangle(bottomLeadingRadius:16,bottomTrailingRadius:16))
         }
     }
 }

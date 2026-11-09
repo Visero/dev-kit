@@ -1,0 +1,9 @@
+a:hover > b + c ~ d:not(.x) {
+  background: url('http://x/y.png?a=1&b=2');
+  -webkit-transform: translateX(5px);
+  content: "a;b";
+}
+@keyframes slide {
+  from { left: 0; }
+  to   { left: 100px; }
+}

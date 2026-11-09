@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "engines": [
+    { "language": "javascript", "executable": "/bin/ls", "arguments": ["-la"] }
+  ]
+}

@@ -95,6 +95,108 @@ struct CoreTests {
         let crossover = moment("2026-11-02T16:00:00Z")
         check("UTC0 clock date",TimeTools.formatted(crossover,minutes:0)=="2026-11-02 16:00:00.000")
         check("UTC8 clock next day",TimeTools.formatted(crossover,minutes:480)=="2026-11-03 00:00:00.000")
+        // Weekly schedule: independent days, migration, validation, fixed-zone rollover.
+        let migrated = WorkWeekSchedule.migrated(legacyTime: " 19:15 ")
+        check("weekly migration weekdays", migrated.days.prefix(5).allSatisfy { $0.isWorkday && $0.time == "19:15" })
+        check("weekly migration weekend", migrated.days.suffix(2).allSatisfy { !$0.isWorkday })
+        check("bad legacy falls back", WorkWeekSchedule.migrated(legacyTime:"bad") == .standard)
+        var weekly = WorkWeekSchedule.standard
+        let times = ["17:00","18:00","19:00","20:00","21:00","22:00","23:00"]
+        for day in WorkWeekday.allCases {
+            weekly[day] = WorkDaySetting(isWorkday:true,time:times[day.rawValue])
+            let noon = moment("2026-11-02T04:00:00Z").addingTimeInterval(Double(day.rawValue) * 86400)
+            check("weekday mapping \(day.title)", WorkWeekday.at(noon) == day)
+            check("independent target \(day.title)", WorkdayCountdown.state(at:noon,schedule:weekly) == .counting(seconds:(5+day.rawValue)*3600))
+        }
+        weekly[.wednesday].isWorkday = false
+        check("weekday can rest", WorkdayCountdown.state(at:moment("2026-11-04T04:00:00Z"),schedule:weekly) == .restDay)
+        check("Friday own target", WorkdayCountdown.state(at:moment("2026-11-06T12:59:59Z"),schedule:weekly) == .counting(seconds:1))
+        check("Friday exact target", WorkdayCountdown.state(at:moment("2026-11-06T13:00:00Z"),schedule:weekly) == .offWork)
+        check("weekly UTC Friday Beijing Saturday", WorkdayCountdown.state(at:moment("2026-11-06T16:00:00Z"),schedule:weekly) == .counting(seconds:22*3600))
+        check("weekly Sunday to Monday", WorkdayCountdown.state(at:moment("2026-11-08T16:00:00Z"),schedule:weekly) == .counting(seconds:17*3600))
+        weekly[.monday].time = "00:00"
+        check("weekly midnight target", WorkdayCountdown.state(at:moment("2026-11-08T16:00:00Z"),schedule:weekly) == .offWork)
+        weekly[.sunday].time = "23:59"
+        check("weekly last minute", WorkdayCountdown.state(at:moment("2026-11-08T15:58:59Z"),schedule:weekly) == .counting(seconds:1))
+        weekly[.monday].time = " 17:00 \n"
+        check("weekly trim", try weekly.validated()[.monday].time == "17:00")
+        var badWeek = weekly
+        badWeek[.friday].time = "25:00"
+        rejects("invalid weekly time") { _ = try badWeek.validated() }
+        badWeek[.friday].isWorkday = false
+        check("rest ignores hidden invalid time", try !badWeek.validated()[.friday].isWorkday)
+        rejects("missing weekday") { _ = try WorkWeekSchedule(days:[]).validated() }
+        let allRest = WorkWeekSchedule(days:weekly.days.map { WorkDaySetting(isWorkday:false,time:$0.time) })
+        check("all week rest", WorkdayCountdown.state(at:oneSecondBefore,schedule:allRest) == .restDay)
+        let normalized = try weekly.validated()
+        check("weekly JSON roundtrip", try JSONDecoder().decode(WorkWeekSchedule.self,from:JSONEncoder().encode(normalized)) == normalized)
+        let suiteName = "DevKit.WeeklyTests.\(UUID().uuidString)"
+        let prefs = UserDefaults(suiteName:suiteName)!
+        defer { prefs.removePersistentDomain(forName:suiteName) }
+        prefs.set("19:15",forKey:WorkSchedulePreferences.legacyKey)
+        check("legacy preferences migrate", WorkSchedulePreferences.load(from:prefs) == migrated)
+        try WorkSchedulePreferences.save(normalized,to:prefs)
+        check("weekly preferences reload", WorkSchedulePreferences.load(from:UserDefaults(suiteName:suiteName)!) == normalized)
+        let beforeInvalid = prefs.data(forKey:WorkSchedulePreferences.key)
+        rejects("invalid save") { try WorkSchedulePreferences.save(WorkWeekSchedule(days:[]),to:prefs) }
+        check("invalid save preserves previous", prefs.data(forKey:WorkSchedulePreferences.key) == beforeInvalid)
+        prefs.set(Data("broken".utf8),forKey:WorkSchedulePreferences.key)
+        check("corrupt weekly fallback", WorkSchedulePreferences.load(from:prefs) == migrated)
+
+        // Syntax highlighting is display-only, UTF-16-safe and deterministic.
+        func colored(_ text:String,_ word:String,_ kind:SyntaxKind,_ language:CodeLanguage) -> Bool {
+            let range=(text as NSString).range(of:word)
+            return SyntaxLexer.spans(text,language:language).contains { $0.range==range && $0.kind==kind }
+        }
+        let code="let emoji = \"你好 👩🏽‍💻\" // comment\nprint(42)"
+        check("Swift keyword",colored(code,"let",.keyword,.swift))
+        check("Unicode string",colored(code,"\"你好 👩🏽‍💻\"",.string,.swift))
+        check("comment",colored(code,"// comment",.comment,.swift))
+        check("function",colored(code,"print",.function,.swift))
+        check("number",colored(code,"42",.number,.swift))
+        check("empty highlights",SyntaxLexer.spans("",language:.automatic).isEmpty)
+        check("plain highlights",SyntaxLexer.spans(code,language:.plain).isEmpty)
+        let json="{\"emoji👋\":\"https://a/#b\",\"n\":-1.20e+30,\"ok\":true,\"empty\":null}"
+        check("JSON key",colored(json,"\"emoji👋\"",.key,.json))
+        check("JSON string",colored(json,"\"https://a/#b\"",.string,.json))
+        check("JSON exponent",colored(json,"-1.20e+30",.number,.json))
+        check("JSON true",colored(json,"true",.literal,.json))
+        check("JSON null",colored(json,"null",.literal,.json))
+        check("JSON no comment",!SyntaxLexer.spans(json,language:.json).contains{$0.kind == .comment})
+        check("escaped quote",colored(#"let a = "he said \"hi\"""#,#""he said \"hi\"""#,.string,.swift))
+        check("Swift nested comment",colored("/* one /* two */ end */ let a=1","/* one /* two */ end */",.comment,.swift))
+        check("Python triple",colored("x = \"\"\"first\nsecond\"\"\"","\"\"\"first\nsecond\"\"\"",.string,.python))
+        check("Python hash",colored("x=1 # hi","# hi",.comment,.python))
+        check("SQL keyword",colored("select name from users","select",.keyword,.sql))
+        check("SQL escape",colored("SELECT 'it''s fine'","'it''s fine'",.string,.sql))
+        check("SQL comment",colored("SELECT 1 -- note","-- note",.comment,.sql))
+        check("JS template",colored("const a=`one\ntwo`","`one\ntwo`",.string,.javascript))
+        check("Go keyword",colored("func main() {}","func",.keyword,.go))
+        check("Rust keyword",colored("pub fn main() {}","fn",.keyword,.rust))
+        check("Java keyword",colored("public class Foo {}","class",.keyword,.java))
+        check("Shell comment",colored("echo x # note","# note",.comment,.shell))
+        check("hex literal",colored("let a=0xff","0xff",.number,.swift))
+        for text in ["\"unterminated","/* unterminated","👋\nlet x=1","\"\"\"abc\n",String(repeating:"\"",count:21)] {
+            let tokens=SyntaxLexer.spans(text,language:.swift)
+            check("bounded tokens",tokens.allSatisfy{$0.range.location>=0 && $0.range.length>0 && NSMaxRange($0.range)<=text.utf16.count})
+            check("non-overlapping tokens",zip(tokens,tokens.dropFirst()).allSatisfy{NSMaxRange($0.0.range)<=$0.1.range.location})
+        }
+        let lines=SyntaxLexer.lineSpans("/* hi\r\nworld */\rlet a=1\n",language:.swift)
+        check("line span count",lines.count==4)
+        check("multiline comment continuity",lines[1].contains{$0.kind == .comment && $0.range==NSRange(location:0,length:8)})
+        check("line keyword offset",lines[2].contains{$0.kind == .keyword && $0.range==NSRange(location:0,length:3)})
+        check("empty line",lines[3].isEmpty)
+        for (source,language) in [(json,CodeLanguage.json),("def test():\n    pass",.python),("SELECT 1",.sql),("package main\nfunc main(){}",.go),("pub fn main() {}",.rust),("func greet(name: String) {}",.swift),("#!/bin/bash\necho x",.shell)] {
+            check("language detection",SyntaxLexer.resolved(.automatic,text:source)==language)
+        }
+        let sizing=WindowSizing.fitted(availableWidth:1800,availableHeight:1200)
+        check("large screen default",sizing==PreferredWindowSize(width:1440,height:960))
+        check("small screen fit",WindowSizing.fitted(availableWidth:1280,availableHeight:760)==PreferredWindowSize(width:1248,height:728))
+        let large=String(repeating:"const x = \"👋\"; // comment\n",count:50000)
+        let started=Date(),largeTokens=SyntaxLexer.spans(large,language:.javascript)
+        check("large highlighting",largeTokens.count==150000)
+        check("large last range",NSMaxRange(largeTokens.last!.range)<=large.utf16.count)
+        print("Highlight benchmark: \(large.utf8.count) bytes, \(Date().timeIntervalSince(started)) seconds")
         print("PASS: \(passed) core assertions")
     }
 }

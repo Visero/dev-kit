@@ -1,0 +1,5 @@
+#!/bin/bash
+# Exit immediately. Tests that a fast engine does NOT pay the full 5s watchdog.
+# Runner should measure wall-clock and assert < 1s.
+head -c 1024
+exit 0

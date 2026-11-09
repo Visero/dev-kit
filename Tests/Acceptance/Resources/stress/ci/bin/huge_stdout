@@ -1,0 +1,4 @@
+#!/bin/bash
+# Emit 5MB to stdout. CodeFormatEngine must THROW (maxOutputBytes=4MB), not truncate.
+python3 -c "import sys; sys.stdout.write('y' * (5 * 1024 * 1024))"
+exit 0

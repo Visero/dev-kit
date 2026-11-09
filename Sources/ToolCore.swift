@@ -199,7 +199,80 @@ private struct JSONParser {
     }
 }
 
-// MARK: - Workday countdown (fixed UTC+8; Monday–Friday, no holiday calendar)
+// MARK: - Weekly work schedule (fixed UTC+8; no holiday calendar)
+enum WorkWeekday: Int, CaseIterable, Identifiable, Codable, Sendable {
+    case monday, tuesday, wednesday, thursday, friday, saturday, sunday
+    var id: Int { rawValue }
+    var title: String { ["周一", "周二", "周三", "周四", "周五", "周六", "周日"][rawValue] }
+    static func at(_ date: Date) -> WorkWeekday {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: WorkdayCountdown.utcOffsetMinutes * 60)!
+        return WorkWeekday(rawValue: (calendar.component(.weekday, from: date) + 5) % 7)!
+    }
+}
+
+struct WorkDaySetting: Codable, Equatable, Sendable {
+    var isWorkday: Bool
+    var time: String
+}
+
+struct WorkWeekSchedule: Codable, Equatable, Sendable {
+    /// Monday first, Sunday last. A rest day retains its time for later re-enabling.
+    var days: [WorkDaySetting]
+
+    static func migrated(legacyTime: String) -> WorkWeekSchedule {
+        let time = (try? WorkdayCountdown.parseTime(legacyTime)) != nil
+            ? legacyTime.trimmingCharacters(in: .whitespacesAndNewlines) : WorkdayCountdown.defaultTime
+        return WorkWeekSchedule(days: WorkWeekday.allCases.map {
+            WorkDaySetting(isWorkday: $0.rawValue < 5, time: time)
+        })
+    }
+    static var standard: WorkWeekSchedule { migrated(legacyTime: WorkdayCountdown.defaultTime) }
+
+    func validated() throws -> WorkWeekSchedule {
+        guard days.count == 7 else { throw KitError.message("每周必须包含周一至周日的 7 项设置。") }
+        var result = self
+        for day in WorkWeekday.allCases {
+            do { _ = try WorkdayCountdown.parseTime(days[day.rawValue].time) }
+            catch {
+                if !days[day.rawValue].isWorkday {
+                    result.days[day.rawValue].time = WorkdayCountdown.defaultTime
+                    continue
+                }
+                throw KitError.message("\(day.title)：请输入 24 小时制 HH:mm，例如 20:30。")
+            }
+            result.days[day.rawValue].time = days[day.rawValue].time.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return result
+    }
+
+    subscript(_ day: WorkWeekday) -> WorkDaySetting {
+        get { days.indices.contains(day.rawValue) ? days[day.rawValue] : Self.standard.days[day.rawValue] }
+        set {
+            guard days.count == 7 else { return }
+            days[day.rawValue] = newValue
+        }
+    }
+}
+
+enum WorkSchedulePreferences {
+    static let key = "DevKit.workWeekSchedule"
+    static let legacyKey = "DevKit.workEndTime"
+
+    static func load(from defaults: UserDefaults = .standard) -> WorkWeekSchedule {
+        if let data = defaults.data(forKey: key),
+           let value = try? JSONDecoder().decode(WorkWeekSchedule.self, from: data),
+           let valid = try? value.validated() { return valid }
+        return .migrated(legacyTime: defaults.string(forKey: legacyKey) ?? WorkdayCountdown.defaultTime)
+    }
+
+    static func save(_ schedule: WorkWeekSchedule, to defaults: UserDefaults = .standard) throws {
+        let valid = try schedule.validated()
+        defaults.set(try JSONEncoder().encode(valid), forKey: key)
+    }
+}
+
+// MARK: - Workday countdown
 enum WorkdayCountdownState: Equatable {
     case counting(seconds: Int)
     case offWork
@@ -232,13 +305,18 @@ enum WorkdayCountdown {
     }
 
     static func state(at now: Date, targetMinutes: Int = defaultMinutes) -> WorkdayCountdownState {
+        let minutes = (0..<1440).contains(targetMinutes) ? targetMinutes : defaultMinutes
+        let time = String(format: "%02d:%02d", minutes / 60, minutes % 60)
+        return state(at: now, schedule: .migrated(legacyTime: time))
+    }
+
+    static func state(at now: Date, schedule: WorkWeekSchedule) -> WorkdayCountdownState {
+        let setting = schedule[WorkWeekday.at(now)]
+        guard setting.isWorkday else { return .restDay }
+        let minutes = (try? parseTime(setting.time)) ?? defaultMinutes
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: utcOffsetMinutes * 60)!
-        let weekday = calendar.component(.weekday, from: now)
-        guard (2...6).contains(weekday) else { return .restDay }
-        let minutes = (0..<1440).contains(targetMinutes) ? targetMinutes : defaultMinutes
-        let midnight = calendar.startOfDay(for: now)
-        let target = midnight.addingTimeInterval(TimeInterval(minutes * 60))
+        let target = calendar.startOfDay(for: now).addingTimeInterval(TimeInterval(minutes * 60))
         guard now < target else { return .offWork }
         return .counting(seconds: Int(ceil(target.timeIntervalSince(now))))
     }

@@ -1,0 +1,7 @@
+.card {
+  display: flex;
+  padding: 8px;
+}
+.title:hover {
+  color: red;
+}

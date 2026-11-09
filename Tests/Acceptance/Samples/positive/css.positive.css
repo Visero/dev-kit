@@ -1,0 +1,11 @@
+.title {
+  color: #007aff;
+  font-size: 14px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 18px;
+  }
+}

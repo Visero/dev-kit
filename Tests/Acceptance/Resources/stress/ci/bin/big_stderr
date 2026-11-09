@@ -1,0 +1,5 @@
+#!/bin/bash
+# Emit 100 KB to stderr then exit 0. Tests stdout/stderr pump + 64 KB stderr cap.
+python3 -c "import sys; sys.stderr.write('x' * (100 * 1024))"
+echo "formatted-output"
+exit 0

@@ -1,0 +1,557 @@
+{
+  "schemaVersion": 1,
+  "generated": "2026-11-03",
+  "owner": "independent-acceptance",
+  "target": {
+    "languages": [
+      {
+        "id": "json",
+        "display": "JSON",
+        "ext": [
+          "json"
+        ]
+      },
+      {
+        "id": "js",
+        "display": "JavaScript",
+        "ext": [
+          "js",
+          "mjs",
+          "cjs"
+        ]
+      },
+      {
+        "id": "ts",
+        "display": "TypeScript",
+        "ext": [
+          "ts",
+          "tsx"
+        ]
+      },
+      {
+        "id": "html",
+        "display": "HTML",
+        "ext": [
+          "html",
+          "htm",
+          "vue"
+        ]
+      },
+      {
+        "id": "css",
+        "display": "CSS",
+        "ext": [
+          "css",
+          "scss",
+          "less"
+        ]
+      },
+      {
+        "id": "python",
+        "display": "Python",
+        "ext": [
+          "py"
+        ]
+      },
+      {
+        "id": "go",
+        "display": "Go",
+        "ext": [
+          "go"
+        ]
+      },
+      {
+        "id": "swift",
+        "display": "Swift",
+        "ext": [
+          "swift"
+        ]
+      },
+      {
+        "id": "java",
+        "display": "Java",
+        "ext": [
+          "java"
+        ]
+      },
+      {
+        "id": "c",
+        "display": "C",
+        "ext": [
+          "c",
+          "h"
+        ]
+      },
+      {
+        "id": "cpp",
+        "display": "C++",
+        "ext": [
+          "cpp",
+          "cc",
+          "cxx",
+          "hpp",
+          "hh"
+        ]
+      },
+      {
+        "id": "sql",
+        "display": "SQL",
+        "ext": [
+          "sql"
+        ]
+      },
+      {
+        "id": "shell",
+        "display": "Shell",
+        "ext": [
+          "sh",
+          "bash",
+          "zsh"
+        ]
+      },
+      {
+        "id": "rust",
+        "display": "Rust",
+        "ext": [
+          "rs"
+        ]
+      }
+    ],
+    "hardRequirements": [
+      "native-swiftui-appkit",
+      "offline-self-contained-arm64",
+      "no-user-code-execution",
+      "no-network-upload",
+      "single-frame-in-place-output-with-undo",
+      "unknown-or-failed-input-retains-original-bytes",
+      "no-generic-indentation-as-substitute-for-real-formatting"
+    ]
+  },
+  "samples": [
+    {
+      "path": "positive/json.positive.json",
+      "category": "positive",
+      "language": "json",
+      "mustPreserveTokens": [
+        "9007199254740993",
+        "-1.20e+30",
+        "你好 👋"
+      ]
+    },
+    {
+      "path": "positive/js.positive.js",
+      "category": "positive",
+      "language": "js"
+    },
+    {
+      "path": "positive/ts.positive.ts",
+      "category": "positive",
+      "language": "ts"
+    },
+    {
+      "path": "positive/html.positive.html",
+      "category": "positive",
+      "language": "html"
+    },
+    {
+      "path": "positive/css.positive.css",
+      "category": "positive",
+      "language": "css"
+    },
+    {
+      "path": "positive/python.positive.py",
+      "category": "positive",
+      "language": "python"
+    },
+    {
+      "path": "positive/go.positive.go",
+      "category": "positive",
+      "language": "go"
+    },
+    {
+      "path": "positive/swift.positive.swift",
+      "category": "positive",
+      "language": "swift"
+    },
+    {
+      "path": "positive/java.positive.java",
+      "category": "positive",
+      "language": "java"
+    },
+    {
+      "path": "positive/c.positive.c",
+      "category": "positive",
+      "language": "c"
+    },
+    {
+      "path": "positive/cpp.positive.cpp",
+      "category": "positive",
+      "language": "cpp"
+    },
+    {
+      "path": "positive/sql.positive.sql",
+      "category": "positive",
+      "language": "sql"
+    },
+    {
+      "path": "positive/shell.positive.sh",
+      "category": "positive",
+      "language": "shell"
+    },
+    {
+      "path": "positive/rust.positive.rs",
+      "category": "positive",
+      "language": "rust"
+    },
+    {
+      "path": "error/js.asi_regex.js",
+      "category": "error",
+      "language": "js",
+      "mustPreserveTokens": [
+        "/ab+c/gi",
+        "/^\\/[^/]+$/",
+        "5 / 2 / 3"
+      ]
+    },
+    {
+      "path": "dangerous/ts.generics.ts",
+      "category": "dangerous",
+      "language": "ts",
+      "mustPreserveTokens": [
+        "Array<\"admin\" | \"user\">",
+        "as const"
+      ]
+    },
+    {
+      "path": "dangerous/html.pre_script.html",
+      "category": "dangerous",
+      "language": "html",
+      "mustPreserveTokens": [
+        "<pre>",
+        "</pre>",
+        "<script>",
+        "</script>",
+        "<style>",
+        "</style>",
+        "<textarea>"
+      ]
+    },
+    {
+      "path": "dangerous/css.vendor_url.css",
+      "category": "dangerous",
+      "language": "css",
+      "mustPreserveTokens": [
+        "-webkit-transform",
+        "@keyframes",
+        "url('http://x/y.png?a=1&b=2')",
+        "!important"
+      ]
+    },
+    {
+      "path": "dangerous/python.indent_triple.py",
+      "category": "dangerous",
+      "language": "python",
+      "mustPreserveTokens": [
+        "\"\"\"triple",
+        "\"\"\"",
+        "r\"raw \\n stays \\\\n\"",
+        "# not a comment"
+      ]
+    },
+    {
+      "path": "dangerous/go.raw_structtag.go",
+      "category": "dangerous",
+      "language": "go",
+      "mustPreserveTokens": [
+        "//go:generate",
+        "`json:\"name,omitempty\"`",
+        "`backticks"
+      ]
+    },
+    {
+      "path": "error/swift.nested_raw.swift",
+      "category": "error",
+      "language": "swift",
+      "mustPreserveTokens": [
+        "/* outer /* inner */ still alive */",
+        "#\"raw \"quote\" inside\"#",
+        "#if swift(>=5.9)"
+      ]
+    },
+    {
+      "path": "dangerous/java.generics_char.java",
+      "category": "dangerous",
+      "language": "java",
+      "mustPreserveTokens": [
+        "<T extends Comparable<T>>",
+        "'a'",
+        "@Deprecated"
+      ]
+    },
+    {
+      "path": "dangerous/c.macro_str.c",
+      "category": "dangerous",
+      "language": "c",
+      "mustPreserveTokens": [
+        "#define MAX(a,b)",
+        "#include <stdio.h>",
+        "\"has \\\"quote\\\"\"",
+        "\"concat\" \"tenated\""
+      ]
+    },
+    {
+      "path": "dangerous/cpp.template_raw.cpp",
+      "category": "dangerous",
+      "language": "cpp",
+      "mustPreserveTokens": [
+        "std::vector<std::vector<int>>",
+        "R\"(raw \"quote\" and \\\\n)\"",
+        "namespace outer::inner"
+      ]
+    },
+    {
+      "path": "dangerous/sql.dialect_quote.sql",
+      "category": "dangerous",
+      "language": "sql",
+      "mustPreserveTokens": [
+        "\"weird column\"",
+        "'it''s ok'",
+        "`backtick`",
+        "-- comment",
+        "/* block"
+      ]
+    },
+    {
+      "path": "dangerous/shell.heredoc.sh",
+      "category": "dangerous",
+      "language": "shell",
+      "mustPreserveTokens": [
+        "<<'EOF'",
+        "<<EXPAND",
+        "$HOME",
+        ";;"
+      ]
+    },
+    {
+      "path": "error/rust.lifetime_raw.rs",
+      "category": "error",
+      "language": "rust",
+      "mustPreserveTokens": [
+        "&str",
+        "r#\"raw \"quote\"\"#",
+        "'\\''",
+        "&'static"
+      ]
+    },
+    {
+      "path": "dangerous/json.bigint_dupkeys.json",
+      "category": "dangerous",
+      "language": "json",
+      "mustPreserveTokens": [
+        "9007199254740993",
+        "-1.20e+30",
+        "1e9999",
+        "\"same\": 1",
+        "\"same\": 2"
+      ]
+    },
+    {
+      "path": "error/js.unterm.js",
+      "category": "error",
+      "language": "js",
+      "mustRetainOriginalBytes": true
+    },
+    {
+      "path": "error/c.unterm.c",
+      "category": "error",
+      "language": "c",
+      "mustRetainOriginalBytes": true
+    },
+    {
+      "path": "error/python.badindent.py",
+      "category": "error",
+      "language": "python",
+      "mustRetainOriginalBytes": true
+    },
+    {
+      "path": "error/sql.unterm.sql",
+      "category": "error",
+      "language": "sql",
+      "mustRetainOriginalBytes": true
+    },
+    {
+      "path": "error/shell.bad.sh",
+      "category": "error",
+      "language": "shell",
+      "mustRetainOriginalBytes": true
+    },
+    {
+      "path": "error/json.trailing.json",
+      "category": "error",
+      "language": "json",
+      "mustRetainOriginalBytes": true
+    },
+    {
+      "path": "ambiguous/looksjson_actually_js.js",
+      "category": "ambiguous",
+      "language": "js",
+      "mustNotDetectAs": [
+        "json"
+      ]
+    },
+    {
+      "path": "ambiguous/lookslike_cpp_in_c.c",
+      "category": "ambiguous",
+      "language": "c",
+      "mustNotDetectAs": [
+        "cpp"
+      ]
+    },
+    {
+      "path": "ambiguous/go_vs_java.go",
+      "category": "ambiguous",
+      "language": "go",
+      "mustNotDetectAs": [
+        "java"
+      ]
+    },
+    {
+      "path": "ambiguous/html_with_js.html",
+      "category": "ambiguous",
+      "language": "html",
+      "mustNotDetectAs": [
+        "js",
+        "sql"
+      ]
+    },
+    {
+      "path": "ambiguous/bare_select.sql",
+      "category": "ambiguous",
+      "language": "sql"
+    },
+    {
+      "path": "ambiguous/shebang_python.sh",
+      "category": "ambiguous",
+      "language": "python"
+    },
+    {
+      "path": "ambiguous/css_vs_jsobject.css",
+      "category": "ambiguous",
+      "language": "css",
+      "mustNotDetectAs": [
+        "js"
+      ]
+    },
+    {
+      "path": "ambiguous/jsobject_vs_css.js",
+      "category": "ambiguous",
+      "language": "js",
+      "mustNotDetectAs": [
+        "css"
+      ]
+    },
+    {
+      "path": "ambiguous/ts_vs_css.ts",
+      "category": "ambiguous",
+      "language": "ts",
+      "mustNotDetectAs": [
+        "css"
+      ]
+    },
+    {
+      "path": "ambiguous/go_struct_vs_css.go",
+      "category": "ambiguous",
+      "language": "go",
+      "mustNotDetectAs": [
+        "css"
+      ]
+    },
+    {
+      "path": "ambiguous/js_decorator_vs_java.js",
+      "category": "ambiguous",
+      "language": "ts",
+      "mustNotDetectAs": [
+        "java"
+      ]
+    },
+    {
+      "path": "ambiguous/py_decorator_vs_java.py",
+      "category": "ambiguous",
+      "language": "python",
+      "mustNotDetectAs": [
+        "java"
+      ]
+    },
+    {
+      "path": "ambiguous/plain_text_string.txt",
+      "category": "ambiguous",
+      "language": "plain"
+    },
+    {
+      "path": "ambiguous/bare_echo_string.sh",
+      "category": "ambiguous",
+      "language": "shell",
+      "allowPlain": true
+    },
+    {
+      "path": "ambiguous/json_scalar.json",
+      "category": "ambiguous",
+      "language": "json"
+    },
+    {
+      "path": "ambiguous/json_array.json",
+      "category": "ambiguous",
+      "language": "json"
+    },
+    {
+      "path": "ambiguous/swift_func_bare.swift",
+      "category": "ambiguous",
+      "language": "swift"
+    },
+    {
+      "path": "ambiguous/go_func_bare.go",
+      "category": "ambiguous",
+      "language": "go",
+      "allowPlain": true
+    },
+    {
+      "path": "dangerous/swift.raw_nested.swift",
+      "category": "dangerous",
+      "language": "swift",
+      "mustPreserveTokens": [
+        "/* outer /* inner comment */ still alive */",
+        "#\"raw \"quote\" inside\"#",
+        "##\"hash(\" inside\"##",
+        "#if swift(>=5.9)"
+      ]
+    },
+    {
+      "path": "dangerous/rust.lifetime_doc.rs",
+      "category": "dangerous",
+      "language": "rust",
+      "mustPreserveTokens": [
+        "&str",
+        "r#\"raw \"quote\" inside\"#",
+        "'\\''",
+        "&'static",
+        "//! Module-level inner doc comment"
+      ]
+    },
+    {
+      "path": "dangerous/js.regex_asi.js",
+      "category": "dangerous",
+      "language": "js",
+      "mustPreserveTokens": [
+        "return { x: 1 };",
+        "/ab+c/gi",
+        "/^\\/[^/]+$/",
+        "5 / 2 / 3"
+      ]
+    },
+    {
+      "path": "error/shell.heredoc_mismatch.sh",
+      "category": "error",
+      "language": "shell"
+    }
+  ]
+}

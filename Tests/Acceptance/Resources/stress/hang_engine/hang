@@ -1,0 +1,3 @@
+#!/bin/bash
+# Hang forever — tests timeout + kill path. Never call from production.
+while true; do sleep 1; done

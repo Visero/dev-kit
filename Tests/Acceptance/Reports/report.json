@@ -1,0 +1,1262 @@
+{
+  "backend" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+  "generatedAt" : "2026-11-03T11:44:06Z",
+  "samples" : [
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "json",
+      "detectionConfidence" : 0.85,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "json",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 225,
+      "inputSHA256" : "8bf154ee5930664fd50d81e7a8d79d9b10dddd34e22545394776eb00d1ba5f4c",
+      "notes" : [
+
+      ],
+      "outputBytes" : 274,
+      "outputSHA256" : "98c18abd1190f35970551c42f4814f43fa03c7298b11b385a3b1a79639b5d874",
+      "sample" : "positive\/json.positive.json",
+      "tokenPreservation" : {
+        "-1.20e+30" : true,
+        "9007199254740993" : true,
+        "你好 👋" : true
+      }
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "javascript",
+      "detectionConfidence" : 0.9500000000000001,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "js",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 185,
+      "inputSHA256" : "6e241537c1a2af8413ffc87e81e89c49576b8ca52ffb0d62a282d2c3a24f0e69",
+      "notes" : [
+
+      ],
+      "outputBytes" : 185,
+      "outputSHA256" : "6e241537c1a2af8413ffc87e81e89c49576b8ca52ffb0d62a282d2c3a24f0e69",
+      "sample" : "positive\/js.positive.js"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "typescript",
+      "detectionConfidence" : 0.7,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "ts",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 239,
+      "inputSHA256" : "a06ea2983d79416b89de07f17cdf76e9caffebdd130513de7872a0435a96040c",
+      "notes" : [
+
+      ],
+      "outputBytes" : 239,
+      "outputSHA256" : "a06ea2983d79416b89de07f17cdf76e9caffebdd130513de7872a0435a96040c",
+      "sample" : "positive\/ts.positive.ts"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "html",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "html",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 187,
+      "inputSHA256" : "9e315a58421d74a22492fe844fa117791acf0f6ccdac907a2cea2f9e3e2a0df9",
+      "notes" : [
+
+      ],
+      "outputBytes" : 205,
+      "outputSHA256" : "3c424a0882cbddd8bb2c29be6af4b99f4ac76b79bda5859bee637c8e862d23e4",
+      "sample" : "positive\/html.positive.html"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "css",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "css",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 133,
+      "inputSHA256" : "eff772f5b95ec62b644c7205fb37bbe6af0d8448def2bfcc87fbf705d60d92fe",
+      "notes" : [
+
+      ],
+      "outputBytes" : 133,
+      "outputSHA256" : "eff772f5b95ec62b644c7205fb37bbe6af0d8448def2bfcc87fbf705d60d92fe",
+      "sample" : "positive\/css.positive.css"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "python",
+      "detectionConfidence" : 0.7,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "python",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 245,
+      "inputSHA256" : "a1ca56684d81b5afa57b2af8e600006428ead16e3e88888f7cdfd9781fd0e278",
+      "notes" : [
+
+      ],
+      "outputBytes" : 245,
+      "outputSHA256" : "a1ca56684d81b5afa57b2af8e600006428ead16e3e88888f7cdfd9781fd0e278",
+      "sample" : "positive\/python.positive.py"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "go",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "go",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 201,
+      "inputSHA256" : "803cfa1cf85006676dd8cf05a553391745860bceb383593638b656566a9bf484",
+      "notes" : [
+
+      ],
+      "outputBytes" : 201,
+      "outputSHA256" : "803cfa1cf85006676dd8cf05a553391745860bceb383593638b656566a9bf484",
+      "sample" : "positive\/go.positive.go"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "swift",
+      "detectionConfidence" : 0.7,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "swift",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 213,
+      "inputSHA256" : "022396a7e318f01a53b4b0a7884f665914fd861e584b78ad840562c1c0ddb1d6",
+      "notes" : [
+
+      ],
+      "outputBytes" : 203,
+      "outputSHA256" : "b728f973e42f632da81d038054648e67fb20d13380dbf33c28699778c97c5c3e",
+      "sample" : "positive\/swift.positive.swift"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "java",
+      "detectionConfidence" : 0.7000000000000001,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "java",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 191,
+      "inputSHA256" : "4cd5f35779651438e1ebf79bc87e84002941ccaef1843427a77fb17a5d9da4cd",
+      "notes" : [
+
+      ],
+      "outputBytes" : 173,
+      "outputSHA256" : "222504c65b009f5fee5f70348ce4ebffabc8feb7a3443e2d29ca217e2c82f79f",
+      "sample" : "positive\/java.positive.java"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "c",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "c",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 231,
+      "inputSHA256" : "52f7269806bc11d22fc7b486444e1b14ec707fb92585b4759e14446028acfa6e",
+      "notes" : [
+
+      ],
+      "outputBytes" : 221,
+      "outputSHA256" : "729f87ee7f42e17da98e180156ae404ac2c3dc523883358e4b08ffdc09907351",
+      "sample" : "positive\/c.positive.c"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "cpp",
+      "detectionConfidence" : 0.9,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "cpp",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 302,
+      "inputSHA256" : "5835c64547297dd096438001b818e40ec1927ba56475499969de924077a05dce",
+      "notes" : [
+
+      ],
+      "outputBytes" : 286,
+      "outputSHA256" : "a301eabf8930f03c4137229612df00b74073842130b3012deecaa1b8afe74f72",
+      "sample" : "positive\/cpp.positive.cpp"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "sql",
+      "detectionConfidence" : 0.85,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "sql",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 116,
+      "inputSHA256" : "402691f56f90eeb8e618339ccf02a08463a82efae3765b7cdbccf7559a7263a1",
+      "notes" : [
+
+      ],
+      "outputBytes" : 129,
+      "outputSHA256" : "465d15e5bc8becc431e3f18c867f0ab1ff24e07a26b7b36eb33dcd8316390d3e",
+      "sample" : "positive\/sql.positive.sql"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "shell",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "shell",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 131,
+      "inputSHA256" : "c3a93840d562d62c91b6f385bd056fd938450c5d5e606ec785e25c7952518b1d",
+      "notes" : [
+
+      ],
+      "outputBytes" : 127,
+      "outputSHA256" : "774a99373c352e11d11778a9476ae547d79fcca9055f5b701edf3033ed3e271a",
+      "sample" : "positive\/shell.positive.sh"
+    },
+    {
+      "category" : "positive",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "rust",
+      "detectionConfidence" : 0.8,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "rust",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 206,
+      "inputSHA256" : "8d455da37ca23fed1bcab23edc84c8c32b63925f847e0c24e526370214a4b84f",
+      "notes" : [
+
+      ],
+      "outputBytes" : 206,
+      "outputSHA256" : "8d455da37ca23fed1bcab23edc84c8c32b63925f847e0c24e526370214a4b84f",
+      "sample" : "positive\/rust.positive.rs"
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "javascript",
+      "detectionConfidence" : 0.65,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "js",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 239,
+      "inputSHA256" : "0df88ff6d3da6fcb08ec0e8bf549fffa506146838b8a1e015335f31f4f03a1a6",
+      "notes" : [
+        "format-threw: engineFailed(\"Invalid regular expression flag. (6:17)\\n  4 | }\\n  5 |\\n> 6 | const re1 = \/a\/b\/i;\\n    |                 ^\\n  7 | const re2 = \/^\\\\\/[^\/]+$\/;\\n  8 | const div = 5 \/ 2 \/ 3;\\n  9 | const s = \\'He said \\\"hi\\\"\\';\")"
+      ],
+      "sample" : "error\/js.asi_regex.js"
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "typescript",
+      "detectionConfidence" : 0.95,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "ts",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 160,
+      "inputSHA256" : "8673b3fa90cd26912d2ff1a62faca3bd42d6b5633a0c25aab8c905af579ee506",
+      "notes" : [
+        "token-loss: [\"Array<\\\"admin\\\" | \\\"user\\\">\"]"
+      ],
+      "outputBytes" : 160,
+      "outputSHA256" : "8673b3fa90cd26912d2ff1a62faca3bd42d6b5633a0c25aab8c905af579ee506",
+      "sample" : "dangerous\/ts.generics.ts",
+      "tokenPreservation" : {
+        "Array<\"admin\" | \"user\">" : false,
+        "as const" : true
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "html",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "html",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 227,
+      "inputSHA256" : "128c376bd8537b1d283cf8991ee620f72d697bc22995bc2c0f0ccb7584f62f7d",
+      "notes" : [
+
+      ],
+      "outputBytes" : 231,
+      "outputSHA256" : "3541c13ba18b0144db551b91f9f5fb2467a9344dfa0729e1abab95b0d8b96256",
+      "sample" : "dangerous\/html.pre_script.html",
+      "tokenPreservation" : {
+        "<\/pre>" : true,
+        "<\/script>" : true,
+        "<\/style>" : true,
+        "<pre>" : true,
+        "<script>" : true,
+        "<style>" : true,
+        "<textarea>" : true
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "css",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "css",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 198,
+      "inputSHA256" : "9b8deb3507798820bb8b439ab5100cb88bfa6ea202221d04c69c1a31e8d6933f",
+      "notes" : [
+        "token-loss: [\"url(\\'http:\/\/x\/y.png?a=1&b=2\\')\", \"!important\"]"
+      ],
+      "outputBytes" : 208,
+      "outputSHA256" : "148bc6b8a4e41f44f848bcb3a15b43e4490121c6f02020d91707ceb1d2394bba",
+      "sample" : "dangerous\/css.vendor_url.css",
+      "tokenPreservation" : {
+        "!important" : false,
+        "-webkit-transform" : true,
+        "@keyframes" : true,
+        "url('http:\/\/x\/y.png?a=1&b=2')" : false
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "python",
+      "detectionConfidence" : 0.7,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "python",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 346,
+      "inputSHA256" : "fdd2cfa1f631d454cf914f18826f1e72fb86a88c5fb043dd593ed2ed7d537caa",
+      "notes" : [
+
+      ],
+      "outputBytes" : 346,
+      "outputSHA256" : "fdd2cfa1f631d454cf914f18826f1e72fb86a88c5fb043dd593ed2ed7d537caa",
+      "sample" : "dangerous\/python.indent_triple.py",
+      "tokenPreservation" : {
+        "\"\"\"" : true,
+        "\"\"\"triple" : true,
+        "# not a comment" : true,
+        "r\"raw \\n stays \\\\n\"" : true
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "go",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "go",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 166,
+      "inputSHA256" : "3f3fcf6277b1754dafe494942fe21c6802ca7b61cdbfd5b2fc78ba709d1aabf6",
+      "notes" : [
+
+      ],
+      "outputBytes" : 166,
+      "outputSHA256" : "3f3fcf6277b1754dafe494942fe21c6802ca7b61cdbfd5b2fc78ba709d1aabf6",
+      "sample" : "dangerous\/go.raw_structtag.go",
+      "tokenPreservation" : {
+        "\/\/go:generate" : true,
+        "`backticks" : true,
+        "`json:\"name,omitempty\"`" : true
+      }
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "swift",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "swift",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 151,
+      "inputSHA256" : "bbe1aa694590f44eb0ad18d57cb3479b3129217895a285eb0a30110210942489",
+      "notes" : [
+        "format-threw: engineFailed(\"\/Users\/bytedance\/CloudSync\/Backup\/DevKit\/<stdin>:3:10: error: expected identifier in macro expansion\\n\/Users\/bytedance\/CloudSync\/Backup\/DevKit\/<stdin>:3:11: error: expected identifier in macro expansion\\n\/Users\/bytedance\/CloudSync\/Backup\/DevKit\/<stdin>:3:21: error: expected identifier in macro expansion\\n\/Users\/bytedance\/CloudSync\/Backup\/DevKit\/<stdin>:3:22: error: expected identifier in macro expansion\\n\/Users\/bytedance\/CloudSync\/Backup\/DevKit\/<stdin>:3:22: error: unexpected code \\')\\' in source file\")"
+      ],
+      "sample" : "error\/swift.nested_raw.swift"
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "java",
+      "detectionConfidence" : 0.7000000000000001,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "java",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 178,
+      "inputSHA256" : "b83a9db4c1e70c29d1421d1f55e54f6e95e47ae6f367769344935c53a28aab59",
+      "notes" : [
+
+      ],
+      "outputBytes" : 185,
+      "outputSHA256" : "0eaff78cadf7cf645adba5cb5b85c6e2ed6e65c67a12de2a538a7895794871d1",
+      "sample" : "dangerous\/java.generics_char.java",
+      "tokenPreservation" : {
+        "'a'" : true,
+        "<T extends Comparable<T>>" : true,
+        "@Deprecated" : true
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "c",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "c",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 215,
+      "inputSHA256" : "42543252853de08e9f522fc9eac07a9252d157c1f0bd00ea2615c9816374c699",
+      "notes" : [
+        "token-loss: [\"#define MAX(a,b)\", \"\\\"concat\\\" \\\"tenated\\\"\"]"
+      ],
+      "outputBytes" : 360,
+      "outputSHA256" : "a74acbe91507a0814450ceebc6f2b3129194af3591be30514369c43d4c61ace2",
+      "sample" : "dangerous\/c.macro_str.c",
+      "tokenPreservation" : {
+        "\"concat\" \"tenated\"" : false,
+        "\"has \\\"quote\\\"\"" : true,
+        "#define MAX(a,b)" : false,
+        "#include <stdio.h>" : true
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "cpp",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "cpp",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 205,
+      "inputSHA256" : "7e87a43f011395a799efe6ac99020d72d945c00a6a6d38da9d663fea03451abd",
+      "notes" : [
+        "token-loss: [\"R\\\"(raw \\\"quote\\\" and \\\\\\\\n)\\\"\"]"
+      ],
+      "outputBytes" : 231,
+      "outputSHA256" : "e9189defc42f51cc34158f95848ff7198e6f7c7d43046ba70cded5477fb3d763",
+      "sample" : "dangerous\/cpp.template_raw.cpp",
+      "tokenPreservation" : {
+        "R\"(raw \"quote\" and \\\\n)\"" : false,
+        "namespace outer::inner" : true,
+        "std::vector<std::vector<int>>" : true
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "sql",
+      "detectionConfidence" : 0.85,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "sql",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 175,
+      "inputSHA256" : "24cc0e78cb063780222fd0f80787ad93ea44250f245414113bb3388d7dafdd7b",
+      "notes" : [
+        "format-threw: engineFailed(\"SQL 语法错误（PostgreSQL 方言）: Parse error: Unexpected \\\"`backtick`\\\" at line 1 column 36.\\nSQL dialect used: \\\"postgresql\\\".\")"
+      ],
+      "sample" : "dangerous\/sql.dialect_quote.sql"
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "shell",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "shell",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 198,
+      "inputSHA256" : "5ba5ba8575868e202dc9ffefc34542bb1cef04d03c20758f222e87071d3feeba",
+      "notes" : [
+
+      ],
+      "outputBytes" : 194,
+      "outputSHA256" : "f93bc60c4ea96ba6f46392a083129a459e4f56f629e8cef3dc2c272a576b689a",
+      "sample" : "dangerous\/shell.heredoc.sh",
+      "tokenPreservation" : {
+        "$HOME" : true,
+        ";;" : true,
+        "<<'EOF'" : true,
+        "<<EXPAND" : true
+      }
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "rust",
+      "detectionConfidence" : 0.8,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "rust",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 232,
+      "inputSHA256" : "01ace9ff8f1b066935f3811e5f46007dc0c7d4a79edd79a3296b43a233eceb6f",
+      "notes" : [
+        "format-threw: engineFailed(\"error[E0753]: expected outer doc comment\\n  --> <stdin>:9:5\\n   |\\n 9 |     \/\/! doc comment\\n   |     ^^^^^^^^^^^^^^^\\n10 |     println!(\\\"{} {}\\\", r, c);\\n   |     ------------------------ the inner doc comment doesn\\'t annotate this item macro invocation\\n   |\\nhelp: to annotate the item macro invocation, change the doc comment from inner to outer style\\n   |\\n 9 -     \/\/! doc comment\\n 9 +     \/\/\/ doc comment\\n   |\")"
+      ],
+      "sample" : "error\/rust.lifetime_raw.rs"
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "json",
+      "detectionConfidence" : 0.5,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "json",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 82,
+      "inputSHA256" : "d0f0a5ee4e32c9927860077ecfea55261747c53b74310896d8fab4e8d7129d8d",
+      "notes" : [
+
+      ],
+      "outputBytes" : 106,
+      "outputSHA256" : "8f6ce363a9f24d192e17275803c40cb5b8485bf4c5ec1731ba5c9e70e385a66a",
+      "sample" : "dangerous\/json.bigint_dupkeys.json",
+      "tokenPreservation" : {
+        "\"same\": 1" : true,
+        "\"same\": 2" : true,
+        "-1.20e+30" : true,
+        "1e9999" : true,
+        "9007199254740993" : true
+      }
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "javascript",
+      "detectionConfidence" : 0.5,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "js",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 58,
+      "inputSHA256" : "eea89a499b75396e0adea25de8427c5dfed740417eaa8b631764cb4ec6178936",
+      "notes" : [
+        "format-threw: engineFailed(\"Unexpected token, expected \\\",\\\" (2:9)\\n  1 | function broken( {\\n> 2 |   const s = \\\"unterminated\\n    |         ^\\n  3 |   if (x) {\\n  4 | }\\n  5 |\")",
+        "error-path: input untouched by contract"
+      ],
+      "retainedOriginalBytes" : true,
+      "sample" : "error\/js.unterm.js"
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "c",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "c",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 65,
+      "inputSHA256" : "ccf4a2405c8e7e49f67cf0b3a0ac5fd748e7d285ff8b912b243330e5eb434f20",
+      "notes" : [
+        "format-threw: engineFailed(\"preflight failed\")",
+        "error-path: input untouched by contract"
+      ],
+      "retainedOriginalBytes" : true,
+      "sample" : "error\/c.unterm.c"
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "python",
+      "detectionConfidence" : 0.7,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "python",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 63,
+      "inputSHA256" : "88f784c59b96be7afcb00bfbcc27cb375601e85e4fbb0e34d3f8d1267dcf6513",
+      "notes" : [
+        "format-threw: engineFailed(\"error: Failed to parse at 2:1: Expected an indented block after function definition\")",
+        "error-path: input untouched by contract"
+      ],
+      "retainedOriginalBytes" : true,
+      "sample" : "error\/python.badindent.py"
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "sql",
+      "detectionConfidence" : 0.85,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "sql",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 68,
+      "inputSHA256" : "9abb99a626080320d7ee6a34ffde5c8f046afc98f1ff1473872076de55c9236b",
+      "notes" : [
+        "format-threw: engineFailed(\"SQL 语法错误（PostgreSQL 方言）: Parse error: Unexpected \\\"\\'untermina\\\" at line 1 column 41.\\nSQL dialect used: \\\"postgresql\\\".\")",
+        "error-path: input untouched by contract"
+      ],
+      "retainedOriginalBytes" : true,
+      "sample" : "error\/sql.unterm.sql"
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "shell",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "shell",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 69,
+      "inputSHA256" : "770c15a6a40afe91d04138bfffbcf7bc21e4023232b7f4872626488ecdfbc271",
+      "notes" : [
+        "format-threw: engineFailed(\"\/dev\/null:3:9: reached EOF without closing quote \\\"\")",
+        "error-path: input untouched by contract"
+      ],
+      "retainedOriginalBytes" : true,
+      "sample" : "error\/shell.bad.sh"
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "json",
+      "detectionConfidence" : 0.5,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "json",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 16,
+      "inputSHA256" : "7edfaad31b76916ec986674527beb4af49c511612f4373142bf026a38cc8a397",
+      "notes" : [
+        "format-threw: JSONIssue(message: \"对象键名必须使用双引号\", line: 1, column: 8)",
+        "error-path: input untouched by contract"
+      ],
+      "retainedOriginalBytes" : true,
+      "sample" : "error\/json.trailing.json"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : false,
+      "detectMatchesExpected" : false,
+      "detectedLanguage" : "json",
+      "detectionConfidence" : 0.5,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "js",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 13,
+      "inputSHA256" : "a0cd83ffbbfb77fe0a68677aaf691070d2cbe351e1da49632a2085dd387f7140",
+      "notes" : [
+        "detection: got=json(json) expected=js(javascript)",
+        "format-threw: engineFailed(\"Unexpected token (1:9)\\n> 1 | {x: 1, y: 2}\\n    |         ^\\n  2 |\")"
+      ],
+      "sample" : "ambiguous\/looksjson_actually_js.js"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "c",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "c",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 47,
+      "inputSHA256" : "a2c9f82c196ba69c924865ab06175141e8fd69d907d1e1a61e4b7f67355b6cf8",
+      "notes" : [
+
+      ],
+      "outputBytes" : 47,
+      "outputSHA256" : "5227a3ab16d538a90d3984c1cb98f46fc7db4e8f75c53b986b779c1c1787ea8b",
+      "sample" : "ambiguous\/lookslike_cpp_in_c.c"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "go",
+      "detectionConfidence" : 0.5,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "go",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 62,
+      "inputSHA256" : "c982993f852a586d6afa4ff7a0344f3ec13250163ee440ec3338e5a3924dafe8",
+      "notes" : [
+
+      ],
+      "outputBytes" : 62,
+      "outputSHA256" : "c982993f852a586d6afa4ff7a0344f3ec13250163ee440ec3338e5a3924dafe8",
+      "sample" : "ambiguous\/go_vs_java.go"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "html",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "html",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 75,
+      "inputSHA256" : "09bb03b85884a13f7b6e60ba10a1e41adcf6f8eab65440367fe6fbd69ff4beee",
+      "notes" : [
+
+      ],
+      "outputBytes" : 83,
+      "outputSHA256" : "84138d26dcdd2ed55dad18c4dd3b6bb4e8d26c2bb35c0b3d49e27427b54384b1",
+      "sample" : "ambiguous\/html_with_js.html"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "sql",
+      "detectionConfidence" : 0.85,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "sql",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 9,
+      "inputSHA256" : "a0a22c9dfa428cdce6fb3e58a40d4052335e17e5fbe42efc2f17f9ca813be62c",
+      "notes" : [
+
+      ],
+      "outputBytes" : 10,
+      "outputSHA256" : "705167cec023ca9579e221afe66e79a2728f6a50337d0bbc503514af8dab521f",
+      "sample" : "ambiguous\/bare_select.sql"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "python",
+      "detectionConfidence" : 0.95,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "python",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 35,
+      "inputSHA256" : "b52077eeaddb616ac5a94083bb4d2c7d61342028529006ee1b5e65b0b7f8d373",
+      "notes" : [
+
+      ],
+      "outputBytes" : 35,
+      "outputSHA256" : "b52077eeaddb616ac5a94083bb4d2c7d61342028529006ee1b5e65b0b7f8d373",
+      "sample" : "ambiguous\/shebang_python.sh"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "css",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "css",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 74,
+      "inputSHA256" : "10022374f75be81aef6fa511480078e8a1fba150cab3ae3e19e29074e3d4b03d",
+      "notes" : [
+
+      ],
+      "outputBytes" : 74,
+      "outputSHA256" : "10022374f75be81aef6fa511480078e8a1fba150cab3ae3e19e29074e3d4b03d",
+      "sample" : "ambiguous\/css_vs_jsobject.css"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "javascript",
+      "detectionConfidence" : 0.6,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "js",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 57,
+      "inputSHA256" : "2c5f0d962ce1a7ba814cb49569e652967714a612b6d4f8347522e461c75901e7",
+      "notes" : [
+
+      ],
+      "outputBytes" : 57,
+      "outputSHA256" : "9b463dbc92a77bf70e6cb3fab39f766d2a5cd12e7d2ab0be0cc4453b3b9737c0",
+      "sample" : "ambiguous\/jsobject_vs_css.js"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "typescript",
+      "detectionConfidence" : 0.6,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "ts",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 58,
+      "inputSHA256" : "c58364de3b724c371bc22af9ae10e2145213050eaf54d1ce3b9c77b922258de7",
+      "notes" : [
+
+      ],
+      "outputBytes" : 58,
+      "outputSHA256" : "c58364de3b724c371bc22af9ae10e2145213050eaf54d1ce3b9c77b922258de7",
+      "sample" : "ambiguous\/ts_vs_css.ts"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "go",
+      "detectionConfidence" : 0.6,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "go",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 52,
+      "inputSHA256" : "d4db89d1483d601c8194be9c2cef7ede599bb5962954657e86963669ed864124",
+      "notes" : [
+
+      ],
+      "outputBytes" : 52,
+      "outputSHA256" : "d4db89d1483d601c8194be9c2cef7ede599bb5962954657e86963669ed864124",
+      "sample" : "ambiguous\/go_struct_vs_css.go"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : false,
+      "detectedLanguage" : "javascript",
+      "detectionConfidence" : 0.6000000000000001,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "ts",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 69,
+      "inputSHA256" : "be50c5c27f5b66f0f9159db9821a4e9b2b5a78e7d71ab2f2b340f3dc36f334a4",
+      "notes" : [
+        "detection: got=javascript(javascript) expected=ts(typescript)"
+      ],
+      "outputBytes" : 69,
+      "outputSHA256" : "4eff3dd66b5a6d7a7d58df4e4c8a60e1132bad1d2bac0343f61ada2138e5fb8a",
+      "sample" : "ambiguous\/js_decorator_vs_java.js"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "python",
+      "detectionConfidence" : 0.7,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "python",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 46,
+      "inputSHA256" : "ca20a0e61ed7a95085d9ea382bf5404262e0b647f651c9359a628cde4b58a168",
+      "notes" : [
+
+      ],
+      "outputBytes" : 46,
+      "outputSHA256" : "ca20a0e61ed7a95085d9ea382bf5404262e0b647f651c9359a628cde4b58a168",
+      "sample" : "ambiguous\/py_decorator_vs_java.py"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "plain",
+      "detectionConfidence" : 0,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "plain",
+      "formatterAvailable" : false,
+      "formatterStatus" : "not-integrated",
+      "inputBytes" : 47,
+      "inputSHA256" : "200f1f2bbfda06c6d7245666d124db26ad172a26e0669c97b3bf6dc7db158606",
+      "notes" : [
+
+      ],
+      "sample" : "ambiguous\/plain_text_string.txt"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "shell",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "shell",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 19,
+      "inputSHA256" : "bf9678a626820bac9ed5fb1627cbbe7e08ee7eba554b49121525b0b5dcb97087",
+      "notes" : [
+
+      ],
+      "outputBytes" : 19,
+      "outputSHA256" : "bf9678a626820bac9ed5fb1627cbbe7e08ee7eba554b49121525b0b5dcb97087",
+      "sample" : "ambiguous\/bare_echo_string.sh"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "json",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "json",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 3,
+      "inputSHA256" : "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0",
+      "notes" : [
+
+      ],
+      "outputBytes" : 2,
+      "outputSHA256" : "73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049",
+      "sample" : "ambiguous\/json_scalar.json"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "json",
+      "detectionConfidence" : 0.85,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "json",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 10,
+      "inputSHA256" : "67358ed8fd6cd4d8aac33acaa376b58237beb891c3e984e505d3e57e43f7d320",
+      "notes" : [
+
+      ],
+      "outputBytes" : 17,
+      "outputSHA256" : "ee72f3be878d91cad8432a95515038c2649e8f04ff3e72f9188712694a8d785f",
+      "sample" : "ambiguous\/json_array.json"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "swift",
+      "detectionConfidence" : 0.5,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "swift",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 55,
+      "inputSHA256" : "5b79008d271f71c0f5d3da4e17cd79a40349a8b95cbb0a40501f900e4ae7ebb5",
+      "notes" : [
+
+      ],
+      "outputBytes" : 53,
+      "outputSHA256" : "b4e5230ee374da7c463b3ecb60db2adfae4d4cb4da2e17e19eb76a2fd98903ad",
+      "sample" : "ambiguous\/swift_func_bare.swift"
+    },
+    {
+      "category" : "ambiguous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "go",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "go",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 48,
+      "inputSHA256" : "3fe06fbf2216778101fa4e35fbb3f78d475c3f7818cf7d166ad7b46d3b55aa51",
+      "notes" : [
+
+      ],
+      "outputBytes" : 48,
+      "outputSHA256" : "3fe06fbf2216778101fa4e35fbb3f78d475c3f7818cf7d166ad7b46d3b55aa51",
+      "sample" : "ambiguous\/go_func_bare.go"
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "swift",
+      "detectionConfidence" : 0.55,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "swift",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 164,
+      "inputSHA256" : "ba905903375293d8a9357b57125237868c25d2687588914f311f951956d3e408",
+      "notes" : [
+
+      ],
+      "outputBytes" : 166,
+      "outputSHA256" : "42a7aec4cfd889b36b3de8a47625deedde4a43aa7dc52dd66f48eb624b0ae46a",
+      "sample" : "dangerous\/swift.raw_nested.swift",
+      "tokenPreservation" : {
+        "#\"raw \"quote\" inside\"#" : true,
+        "##\"hash(\" inside\"##" : true,
+        "#if swift(>=5.9)" : true,
+        "\/* outer \/* inner comment *\/ still alive *\/" : true
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "rust",
+      "detectionConfidence" : 0.8,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "rust",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 346,
+      "inputSHA256" : "e379a341c9541e2cbce244f92e32aae1a216fa4f0487f2e4a7072c78131bfc88",
+      "notes" : [
+
+      ],
+      "outputBytes" : 346,
+      "outputSHA256" : "e379a341c9541e2cbce244f92e32aae1a216fa4f0487f2e4a7072c78131bfc88",
+      "sample" : "dangerous\/rust.lifetime_doc.rs",
+      "tokenPreservation" : {
+        "&'static" : true,
+        "&str" : true,
+        "'\\''" : true,
+        "\/\/! Module-level inner doc comment" : true,
+        "r#\"raw \"quote\" inside\"#" : true
+      }
+    },
+    {
+      "category" : "dangerous",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "javascript",
+      "detectionConfidence" : 0.75,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "js",
+      "formatterAvailable" : true,
+      "formatterStatus" : "ok",
+      "idempotent" : true,
+      "inputBytes" : 186,
+      "inputSHA256" : "1f69ecde843dbe09099935948e51cad316cedeca232c91c95acca011639f856b",
+      "notes" : [
+
+      ],
+      "outputBytes" : 186,
+      "outputSHA256" : "1f69ecde843dbe09099935948e51cad316cedeca232c91c95acca011639f856b",
+      "sample" : "dangerous\/js.regex_asi.js",
+      "tokenPreservation" : {
+        "\/^\\\/[^\/]+$\/" : true,
+        "\/ab+c\/gi" : true,
+        "5 \/ 2 \/ 3" : true,
+        "return { x: 1 };" : true
+      }
+    },
+    {
+      "category" : "error",
+      "detectAvoidsForbidden" : true,
+      "detectMatchesExpected" : true,
+      "detectedLanguage" : "shell",
+      "detectionConfidence" : 1,
+      "detectionRule" : "score-based",
+      "engine" : "stub.v1 (SyntaxLexer.detect + CodeFormatEngine routing)",
+      "expectedLanguage" : "shell",
+      "formatterAvailable" : true,
+      "formatterStatus" : "error",
+      "inputBytes" : 195,
+      "inputSHA256" : "e1867684934df06a9723d6c6a667c2b435a88fcf13e24c988e2fe7c896d6a63f",
+      "notes" : [
+        "format-threw: engineFailed(\"\/dev\/null:5:5: unclosed here-document \\'EXPAND\\'\")"
+      ],
+      "sample" : "error\/shell.heredoc_mismatch.sh"
+    }
+  ],
+  "sourcesSnapshot" : {
+    "CodeDraftStore.swift" : "fed2bea66a3129add242bb48e81905441c474ce031a5dcbdc1e1dc13b3596ef1",
+    "CodeFormatting.swift" : "b78a4ca64f94f0b9a9f299a397ff4370189fa02ae1976ab9b97caa6f85ed9188",
+    "Components.swift" : "c49ead8707f396fedfe0d978caeb36eb9b94c8c85e94de30bd864cca4b8a1ed9",
+    "DevKitApp.swift" : "5eac9c86b264411ec69a5a27c0cc5b17767fae9471d56ef705f4508774b6c8d6",
+    "SyntaxCore.swift" : "0bbd68381917f1cbc6f411a41efc65f06a0e82d4b3cad649376d7c9b376bb1d7",
+    "SyntaxUI.swift" : "3d5a4e906d19378cb9948c2523b46b5e9aedd76611c4b9a69116f170a2167cc9",
+    "TextTools.swift" : "30cbf417ba1cecbf11ebbaf8cee705d4ed109c146696a59c56e0608a53cf0658",
+    "TimeViews.swift" : "acc078d9a4a8413fb147a690e893d2383b60d207680ca5c368ecb0d7fd9c0837",
+    "ToolCore.swift" : "ae451e560ecc864e1412bd231297722f74a96f3d4603e94bf1be7dd8d9aebef7"
+  },
+  "summary" : {
+    "coverageGaps" : [
+      "plain: formatter not yet integrated"
+    ],
+    "detectionMisses" : 2,
+    "failed" : 6,
+    "formatterError" : 12,
+    "notIntegrated" : 1,
+    "ok" : 43,
+    "retainedOk" : 6,
+    "total" : 56
+  }
+}

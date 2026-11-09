@@ -2,9 +2,16 @@ import SwiftUI
 
 struct EpochPage: View {
     @ObservedObject var store: ToolkitStore
+    var embedded = false
     var minutes: Int { (try? TimeTools.offsetMinutes(store.savedOffset)) ?? 0 }
     var body: some View {
-        ScrollView {
+        Group {
+            if embedded { converterContent }
+            else { ScrollView { converterContent } }
+        }.onChange(of:store.savedOffset) { _,_ in if !store.epochInput.isEmpty { convertEpoch() };if !store.dateInput.isEmpty { convertDate() } }
+        .onChange(of:store.epochUnit) { _,_ in store.epochResult="";store.epochError="" }
+    }
+    private var converterContent: some View {
             VStack(alignment:.leading,spacing:18) {
                 OffsetControl(saved:$store.savedOffset)
                 Panel {
@@ -34,8 +41,6 @@ struct EpochPage: View {
                 }
                 Text("Unix 起点为 1970-01-01 00:00:00 UTC。支持负数及毫秒；日期按所选固定 UTC 偏移解释，不套用夏令时。").font(.system(size:11)).foregroundStyle(.secondary)
             }
-        }.onChange(of:store.savedOffset) { _,_ in if !store.epochInput.isEmpty { convertEpoch() };if !store.dateInput.isEmpty { convertDate() } }
-        .onChange(of:store.epochUnit) { _,_ in store.epochResult="";store.epochError="" }
     }
     func convertEpoch() {
         do { let date=try TimeTools.timestamp(store.epochInput,unit:store.epochUnit);store.epochResult=TimeTools.formatted(date,minutes:minutes);store.epochError="" }
@@ -49,7 +54,7 @@ struct EpochPage: View {
 private final class ClockViewState: ObservableObject {
     @Published var showsCustomZone = false
     @Published var editing = false
-    @Published var draft = ""
+    @Published var schedule = WorkWeekSchedule.standard
     @Published var error = ""
 }
 
@@ -68,8 +73,8 @@ struct ClockPage: View {
                                 LiveClockCard(date:date,minutes:0,title:"UTC+0",subtitle:"协调世界时")
                                 LiveClockCard(date:date,minutes:480,title:"UTC+8",subtitle:"北京时间")
                             }
-                            .frame(height:max(250, min(440, geometry.size.height - 230)))
-                            WorkCountdownCard(date:date,savedTime:$store.workEndTime)
+                            .frame(height:max(220, min(300, geometry.size.height * 0.34)))
+                            WorkCountdownCard(date:date,store:store)
                             HStack(spacing:16) {
                                 ValueBox(label:"UNIX SECONDS",value:TimeTools.epoch(Date(timeIntervalSince1970:floor(date.timeIntervalSince1970)),unit:.seconds))
                                     .frame(maxWidth:.infinity)
@@ -86,7 +91,11 @@ struct ClockPage: View {
                             }
                         }.padding(.top,12)
                     }.font(.system(size:12)).foregroundStyle(.secondary)
-                    Text("每秒刷新 · 固定 UTC 偏移 · 下班按 UTC+8 的周一至周五计算，不含节假日及调休。")
+                    Divider().padding(.vertical,8)
+                    Label("Unix 时间戳转换",systemImage:"arrow.left.arrow.right").font(.system(size:18,weight:.semibold))
+                    Text("转换按下方所选 UTC 偏移计算，不改变上方固定双时钟。").font(.system(size:11)).foregroundStyle(.secondary)
+                    EpochPage(store:store,embedded:true)
+                    Text("每秒刷新 · 下班按 UTC+8 的每周设置计算，不自动匹配节假日及调休。")
                         .font(.system(size:10)).foregroundStyle(.tertiary)
                 }.padding(1)
             }
@@ -127,39 +136,62 @@ private struct LiveClockCard: View {
 
 private struct WorkCountdownCard: View {
     let date: Date
-    @Binding var savedTime: String
+    @ObservedObject var store: ToolkitStore
     @StateObject private var viewState = ClockViewState()
+    var today: WorkWeekday { WorkWeekday.at(date) }
+    var setting: WorkDaySetting { store.workWeekSchedule[today] }
     var state: WorkdayCountdownState {
-        WorkdayCountdown.state(at:date,targetMinutes:(try? WorkdayCountdown.parseTime(savedTime)) ?? WorkdayCountdown.defaultMinutes)
+        WorkdayCountdown.state(at:date,schedule:store.workWeekSchedule)
     }
     var body: some View {
         HStack(spacing:16) {
             Image(systemName:"briefcase").font(.system(size:21)).foregroundStyle(.teal)
             VStack(alignment:.leading,spacing:5) {
                 Text("下班倒计时").font(.system(size:13,weight:.semibold))
-                Text("周一至周五 · \(savedTime) · UTC+8").font(.system(size:11)).foregroundStyle(.secondary)
+                Text("今天\(today.title) · \(setting.isWorkday ? setting.time : "休息日") · UTC+8")
+                    .font(.system(size:11)).foregroundStyle(.secondary)
             }
             Spacer(minLength:8)
             Text(state.display).font(.system(size:28,weight:.medium,design:.rounded)).monospacedDigit()
                 .lineLimit(1).minimumScaleFactor(0.7).foregroundStyle(.teal)
                 .accessibilityLabel("下班状态").accessibilityValue(state.display)
             Button {
-                viewState.draft = savedTime; viewState.error = ""; viewState.editing = true
+                viewState.schedule = store.workWeekSchedule
+                viewState.error = ""; viewState.editing = true
             } label: { Image(systemName:"slider.horizontal.3") }
-                .buttonStyle(.borderless).help("设置下班时间").accessibilityLabel("设置下班时间")
+                .buttonStyle(.borderless).help("设置每周下班时间").accessibilityLabel("设置下班时间")
                 .popover(isPresented:$viewState.editing) {
-                    VStack(alignment:.leading,spacing:14) {
-                        Text("下班时间").font(.headline)
-                        Text("北京时间 UTC+8 · 周一至周五\n不含法定节假日和调休；到点显示已下班。").font(.system(size:12)).foregroundStyle(.secondary)
-                        HStack {
-                            TextField("20:30",text:$viewState.draft).textFieldStyle(.roundedBorder)
-                                .font(.system(size:15,design:.monospaced)).frame(width:90)
-                                .accessibilityLabel("下班时间 HH:mm").onSubmit(save)
-                            Text("24 小时制").font(.system(size:11)).foregroundStyle(.secondary)
+                    VStack(alignment:.leading,spacing:12) {
+                        Text("每周下班时间").font(.headline)
+                        Text("北京时间 UTC+8 · 每周重复\n关闭某一天即为休息日，不自动匹配节假日或调休。")
+                            .font(.system(size:11)).foregroundStyle(.secondary)
+                        ForEach(WorkWeekday.allCases) { day in
+                            HStack(spacing:14) {
+                                Text(day.title).font(.system(size:13,weight:day == today ? .semibold : .regular))
+                                    .frame(width:34,alignment:.leading)
+                                Toggle("工作日",isOn:Binding(
+                                    get:{viewState.schedule[day].isWorkday},
+                                    set:{viewState.schedule[day].isWorkday=$0;viewState.error=""}))
+                                    .toggleStyle(.switch).labelsHidden().controlSize(.small)
+                                    .accessibilityLabel("\(day.title)工作日")
+                                Spacer()
+                                if viewState.schedule[day].isWorkday {
+                                    TextField("HH:mm",text:Binding(
+                                        get:{viewState.schedule[day].time},
+                                        set:{viewState.schedule[day].time=$0;viewState.error=""}))
+                                        .textFieldStyle(.roundedBorder)
+                                        .font(.system(size:13,design:.monospaced)).frame(width:86)
+                                        .accessibilityLabel("\(day.title)下班时间").onSubmit(save)
+                                } else {
+                                    Text("休息日").font(.system(size:12)).foregroundStyle(.secondary)
+                                        .frame(width:86)
+                                }
+                            }.frame(height:28)
                         }
                         Notice(text:viewState.error,error:true)
+                        Divider()
                         HStack {
-                            Button("恢复 20:30") { viewState.draft = WorkdayCountdown.defaultTime; viewState.error = "" }
+                            Button("恢复默认") { viewState.schedule = .standard;viewState.error="" }
                             Spacer()
                             Button("取消") { viewState.editing = false }
                             Button("保存",action:save).buttonStyle(.borderedProminent)
@@ -172,8 +204,7 @@ private struct WorkCountdownCard: View {
     }
     private func save() {
         do {
-            _ = try WorkdayCountdown.parseTime(viewState.draft)
-            savedTime = viewState.draft.trimmingCharacters(in:.whitespacesAndNewlines)
+            try store.setWorkWeekSchedule(viewState.schedule)
             viewState.error = ""; viewState.editing = false
         } catch { viewState.error = error.localizedDescription }
     }

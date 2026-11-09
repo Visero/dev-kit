@@ -1,0 +1,6 @@
+#!/bin/bash
+# Do NOT read stdin. Parent writes stdin then closes; if this blocks reading
+# stdin we'd hang. Just echo and exit 0. Tests that process doesn't block
+# waiting for stdin after it has decided to exit.
+echo "ignored-stdin-output"
+exit 0

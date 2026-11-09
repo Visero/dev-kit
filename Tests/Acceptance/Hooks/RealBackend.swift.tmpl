@@ -1,0 +1,39 @@
+// RealBackend.swift — template.
+//
+// Once Sources/CodeFormatting.swift lands, copy this file to
+//   Tests/Acceptance/Hooks/RealBackend.swift
+// and replace BOTH TODO blocks below. Do not edit Sources/.
+//
+// Then rebuild with:
+//   rm Tests/Acceptance/Hooks/StubBackend.swift
+//   (or compile with -D DEVKIT_REAL_BACKEND — but simplest is to swap files)
+//   bash Tests/Acceptance/run.sh
+
+import Foundation
+
+enum RealBackend: FormatBackend {
+    static var backendName: String { "codeformat.v1 (CodeFormatEngine + bundled manifests)" }
+
+    static func detect(_ text: String) -> (languageID: String, confidence: Double, rule: String) {
+        let result = SyntaxLexer.detect(text)
+        return (result.language.manifestIdentifier.isEmpty ? "plain" : result.language.manifestIdentifier,
+                result.confidence, "score-based")
+    }
+
+    static func format(_ text: String, languageID: String) throws -> String? {
+        // RealBackend is intentionally identical to StubBackend now that
+        // CodeFormatting.swift is integrated. The only reason this file
+        // exists is to flip backendName and add post-conditions (e.g.
+        // verifying bundled executables are signed / present).
+        guard let langID = CodeLanguage.allCases.first(where: { $0.manifestIdentifier == languageID }) else {
+            return nil
+        }
+        do {
+            return try CodeFormatEngine.format(text, language: langID, indent: "  ")
+        } catch let e as FormatError {
+            if case .noEngineAvailable = e { return nil }
+            if case .engineNotFound = e { return nil }
+            throw e
+        }
+    }
+}

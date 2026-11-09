@@ -1,0 +1,10 @@
+{
+  "engines": [
+    { "language": "javascript", "executable": "Formatters/native/bin/big_stderr",        "arguments": [] },
+    { "language": "typescript",  "executable": "Formatters/native/bin/no_stdin_read",     "arguments": [] },
+    { "language": "python",      "executable": "Formatters/native/bin/ignore_term",       "arguments": [] },
+    { "language": "go",          "executable": "Formatters/native/bin/fast_exit",       "arguments": [] },
+    { "language": "html",        "executable": "Formatters/native/bin/big_stdout_tail",   "arguments": [] },
+    { "language": "rust",        "executable": "Formatters/native/bin/huge_stdout",       "arguments": [] }
+  ]
+}

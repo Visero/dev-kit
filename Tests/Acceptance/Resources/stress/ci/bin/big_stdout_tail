@@ -1,0 +1,4 @@
+#!/bin/bash
+# Emit 100KB to stdout with a TAIL_MARKER at the end. Verify tail preservation.
+python3 -c "import sys; sys.stdout.write('x' * (100 * 1024 - 20) + 'TAIL_MARKER_12345')"
+exit 0
