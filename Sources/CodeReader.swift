@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -105,6 +106,8 @@ final class CodeReaderWindowController: NSWindowController, NSTextViewDelegate, 
     let editor = HighlightTextView(frame:NSRect(x:0,y:0,width:980,height:740))
     let scroll = NSScrollView()
     var ruler: CodeLineRuler!
+    private let vimToggle = NSButton(checkboxWithTitle:"Vim 模式", target:nil, action:nil)
+    private let vimModeLabel = NSTextField(labelWithString:"NORMAL")
     private var generation = UUID()
     private var pending: DispatchWorkItem?
     private weak var fileModel: CodeReaderDocument?
@@ -143,7 +146,20 @@ final class CodeReaderWindowController: NSWindowController, NSTextViewDelegate, 
         scroll.documentView = editor
         ruler = CodeLineRuler(scrollView:scroll,textView:editor)
         scroll.verticalRulerView = ruler;scroll.hasVerticalRuler = true;scroll.hasHorizontalRuler = false;scroll.rulersVisible = true
-        window.contentView = scroll
+        let container = NSView(frame:NSRect(x:0,y:0,width:1000,height:760))
+        scroll.frame = container.bounds
+        scroll.autoresizingMask = [.width,.height]
+        container.addSubview(scroll)
+        window.contentView = container
+        editor.vimEnabled = UserDefaults.standard.bool(forKey:"DevKit.vimMode")
+        vimModeLabel.stringValue = editor.vim.mode.label
+        vimModeLabel.isHidden = !editor.vimEnabled
+        editor.vim.onModeChange = { [weak self] mode in
+            guard let self else { return }
+            self.vimModeLabel.stringValue = mode.label
+            self.vimModeLabel.isHidden = !self.editor.vimEnabled
+        }
+        installVimBar(in:container)
         window.delegate = self
         editor.themeChanged = { [weak self] in self?.scheduleHighlight() }
         scheduleHighlight()
@@ -151,6 +167,45 @@ final class CodeReaderWindowController: NSWindowController, NSTextViewDelegate, 
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     deinit { pending?.cancel() }
+    private func installVimBar(in container: NSView) {
+        let bar = NSVisualEffectView()
+        bar.material = .popover
+        bar.blendingMode = .withinWindow
+        bar.state = .active
+        bar.wantsLayer = true
+        bar.layer?.cornerRadius = 9
+        bar.layer?.masksToBounds = true
+        vimToggle.target = self
+        vimToggle.action = #selector(toggleVim(_:))
+        vimToggle.bezelStyle = .rounded
+        vimToggle.controlSize = .small
+        vimToggle.state = editor.vimEnabled ? .on : .off
+        vimToggle.setAccessibilityLabel("Vim 模式")
+        vimModeLabel.font = .monospacedSystemFont(ofSize:10,weight:.semibold)
+        vimModeLabel.textColor = .secondaryLabelColor
+        let stack = NSStackView(views:[vimToggle,vimModeLabel])
+        stack.orientation = .horizontal
+        stack.spacing = 6
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        bar.translatesAutoresizingMaskIntoConstraints = false
+        bar.addSubview(stack)
+        container.addSubview(bar)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo:bar.leadingAnchor,constant:8),
+            stack.trailingAnchor.constraint(equalTo:bar.trailingAnchor,constant:-8),
+            stack.topAnchor.constraint(equalTo:bar.topAnchor,constant:6),
+            stack.bottomAnchor.constraint(equalTo:bar.bottomAnchor,constant:-6),
+            bar.trailingAnchor.constraint(equalTo:container.trailingAnchor,constant:-16),
+            bar.topAnchor.constraint(equalTo:container.topAnchor,constant:12)])
+    }
+    @objc private func toggleVim(_ sender: NSButton) {
+        let on = sender.state == .on
+        UserDefaults.standard.set(on,forKey:"DevKit.vimMode")
+        editor.vimEnabled = on
+        vimModeLabel.stringValue = editor.vim.mode.label
+        vimModeLabel.isHidden = !on
+        window?.makeFirstResponder(editor)
+    }
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         requestClose { _ in }
         return false
@@ -279,12 +334,40 @@ final class DevKitAppDelegate: NSObject, NSApplicationDelegate {
 struct CodeReaderPage: View {
     @ObservedObject var manager: CodeReaderManager
     @ObservedObject var recent: RecentCodeFiles
+    @ObservedObject private var opener = CodeDefaultOpener.shared
     init(manager: CodeReaderManager) { self.manager = manager;recent = manager.recent }
     var body: some View {
         VStack(alignment:.leading,spacing:22) {
             Button(action:manager.chooseFile) { Label("打开代码文件",systemImage:"folder") }
                 .buttonStyle(.borderedProminent).controlSize(.large)
                 .accessibilityLabel("打开代码文件")
+            VStack(alignment:.leading,spacing:10) {
+                VStack(alignment:.leading,spacing:3) {
+                    Text("常用代码格式默认用 DevKit 打开").font(.system(size:13,weight:.medium))
+                    Text("逐个开启，关闭即恢复原来的应用；系统会为每一项弹出确认。不含 .txt")
+                        .font(.system(size:11)).foregroundStyle(.secondary)
+                }
+                LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:16),count:3),spacing:9) {
+                    ForEach(CodeDefaultOpener.extensions,id:\.self) { ext in
+                        HStack(spacing:8) {
+                            Text(".\(ext)").font(.system(size:12,design:.monospaced))
+                                .foregroundStyle(.secondary)
+                            Spacer(minLength:0)
+                            Toggle("",isOn:Binding(get:{opener.isEnabled(ext)},set:{opener.setEnabled($0,for:ext)}))
+                                .labelsHidden().toggleStyle(.switch).controlSize(.mini)
+                                .disabled(opener.isPending(ext))
+                                .accessibilityLabel("用 DevKit 打开 .\(ext) 文件")
+                        }
+                    }
+                }
+                Text(CodeDefaultOpener.tsNote).font(.system(size:11)).foregroundStyle(.tertiary)
+                if !opener.message.isEmpty {
+                    Text(opener.message).font(.system(size:11)).foregroundStyle(.secondary)
+                        .fixedSize(horizontal:false,vertical:true)
+                }
+            }
+            .padding(14).frame(maxWidth:.infinity,alignment:.leading)
+            .background(Color.primary.opacity(0.035),in:RoundedRectangle(cornerRadius:12))
             if !recent.urls.isEmpty {
                 Text("最近打开").font(.system(size:12,weight:.semibold)).foregroundStyle(.secondary)
                 VStack(spacing:0) {
@@ -307,5 +390,8 @@ struct CodeReaderPage: View {
             }
             Spacer()
         }.frame(maxWidth:.infinity,maxHeight:.infinity,alignment:.topLeading)
+        .onAppear { opener.refresh() }
+        .onReceive(NotificationCenter.default.publisher(for:NSApplication.didBecomeActiveNotification)) { _ in opener.refresh() }
+        .onReceive(Timer.publish(every:2,on:.main,in:.common).autoconnect()) { _ in opener.refresh() }
     }
 }

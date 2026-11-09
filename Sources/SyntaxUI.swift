@@ -37,6 +37,15 @@ enum SyntaxStyle {
 }
 final class HighlightTextView: NSTextView {
     var themeChanged:(()->Void)?
+    /// Vim state only runs when the standalone editor window enables it.
+    let vim=VimState()
+    var vimEnabled=false {
+        didSet { vim.reset(vimEnabled ? .normal : .insert) }
+    }
+    override func keyDown(with event: NSEvent) {
+        if handleVimKey(event) { return }
+        super.keyDown(with: event)
+    }
     override func viewDidChangeEffectiveAppearance() { super.viewDidChangeEffectiveAppearance();themeChanged?() }
 }
 struct HighlightedCode: View {

@@ -80,7 +80,8 @@ struct CodeReaderTests {
             exit(1)
         }
         let view = controller.editor
-        check("independent code-only content",controller.window?.contentView === controller.scroll)
+        check("independent code-only content",controller.window?.contentView?.subviews.contains(controller.scroll) == true)
+        check("vim bar installed",controller.window?.contentView?.subviews.contains { $0 is NSVisualEffectView } == true)
         check("gutter enabled",controller.scroll.rulersVisible && controller.scroll.verticalRulerView is CodeLineRuler)
         check("gutter correct lines",controller.ruler.index.starts.count == 3)
         check("editable plain text",view.isEditable && !view.isRichText)

@@ -9,8 +9,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 OUT="$ROOT/build"
-VERSION="1.6.2"
-BUILD="12"
+VERSION="1.6.3"
+BUILD="13"
 ARCH="arm64"
 TARGET="arm64-apple-macosx14.0"
 
