@@ -185,6 +185,7 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.3-macO
 - `.tsx` 显式走 `com.microsoft.typescript`；`Info.plist` 的 `LSItemContentTypes` 已移除该声明，避免 `tsx` 被列为候选而出现幽灵关联。
 - 编辑器窗口右上角新增「Vim 模式」开关，状态存 `DevKit.vimMode`。现场验证：勾选后状态标签由 `INSERT` 切到 `NORMAL`，按 `i` 变 `INSERT`，`Esc` 回 `NORMAL`；`h`/`j`/`k`/`l`、`0`/`$`、`w`/`b`、`gg`/`G`、`x`、`dd`、`yy`、`p`、`u` 已接入状态机，带 ⌘/⌃/⌥ 的组合键放行给 AppKit。
 - 逐格式开关现场验证：点开 `.json` → 弹出一个 CoreServicesUIAgent 确认框 → 选择拒绝 → 系统回落 `com.apple.dt.Xcode`，界面自动纠正开关位。重启后 25 项全部回到基线（`tsx → com.microsoft.VSCode`、`json → com.apple.dt.Xcode`），阅读器页 24 个开关全部为关。
+- 正向闭环同样验证通过：再次点开 `.json` 并选「使用 DevKit」，查询确认为 `com.visero.devkit`，界面提示「已把 .json 交给 DevKit 打开」；随后关掉该开关并选「使用 Xcode」，查询回到 `com.apple.dt.Xcode`，备份字典里的 `public.json` 记录同步删除，25 项全部回到基线。
 - `bash test.sh` 全部通过，共 656 项断言：核心 343、格式化 29、检测 33、原生 61、草稿 16、替换/撤销 10、Store 集成 17、同步 33、阅读器 71、笔记/Markdown/导航 43。
 
 ### 1.6.2 历史
