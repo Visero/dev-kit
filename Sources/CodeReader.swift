@@ -381,16 +381,18 @@ struct CodeReaderPage: View {
                     Text("逐个开启，关闭即恢复原来的应用；系统会为每一项弹出确认。不含 .txt")
                         .font(.system(size:11)).foregroundStyle(.secondary)
                 }
-                LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:16),count:3),spacing:9) {
+                LazyVGrid(columns:Array(repeating:GridItem(.flexible(),spacing:44),count:3),spacing:10) {
                     ForEach(CodeDefaultOpener.extensions,id:\.self) { ext in
                         HStack(spacing:8) {
                             Text(".\(ext)").font(.system(size:12,design:.monospaced))
                                 .foregroundStyle(.secondary)
-                            Spacer(minLength:0)
+                                .lineLimit(1).fixedSize()
+                                .frame(width:46,alignment:.leading)
                             Toggle("",isOn:Binding(get:{opener.isEnabled(ext)},set:{opener.setEnabled($0,for:ext)}))
                                 .labelsHidden().toggleStyle(.switch).controlSize(.mini)
                                 .disabled(opener.isPending(ext))
                                 .accessibilityLabel("用 DevKit 打开 .\(ext) 文件")
+                            Spacer(minLength:0)
                         }
                     }
                 }

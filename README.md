@@ -4,13 +4,13 @@
 
 ## 运行
 
-解压 `DevKit-1.6.8-macOS-arm64.zip`，双击其中的 `DevKit.app`。也可将它拖到「应用程序」。构建目标为 Apple Silicon（arm64）、macOS 14 及以上；当前开发环境为 macOS 27.0.1。未在 Intel Mac 或更早 macOS 版本上实测。
+解压 `DevKit-1.6.9-macOS-arm64.zip`，双击其中的 `DevKit.app`。也可将它拖到「应用程序」。构建目标为 Apple Silicon（arm64）、macOS 14 及以上；当前开发环境为 macOS 27.0.1。未在 Intel Mac 或更早 macOS 版本上实测。
 
 应用使用本地 ad-hoc 签名，没有 Apple Developer ID 签名及公证。如果下载后被系统阻止，请在确认文件来源后，使用系统「隐私与安全性」中的「仍要打开」。不要关闭系统安全机制。
 
 ## 功能
 
-- **代码阅读器（1.6.3）**：主侧栏新增入口，页面上半部是打开按钮与最多 5 个最近文件，下方是「默认打开程序」的逐格式开关。代码文件在独立窗口内阅读/编辑，显示逻辑行号与语法高亮，不显示工具侧栏或状态栏；支持 ⌘S 保存、⌘Z 撤销、⌘F 查找，右上角可开「Vim 模式」。通过 Finder「打开方式 → DevKit」或拖到应用图标也进入独立窗口；安装或升级本身不改变系统的任何默认打开方式，只有手动打开某个格式的开关才会生效。
+- **代码阅读器（1.6.3）**：主侧栏新增入口，页面上半部是打开按钮与最多 5 个最近文件，下方是「默认打开程序」的逐格式开关。代码文件在独立窗口内阅读/编辑，显示逻辑行号与语法高亮，不显示工具侧栏或状态栏；支持 ⌘S 保存、⌘Z 撤销、⌘F 查找，右上角可开「Vim 模式」。通过 Finder「打开方式 → DevKit」或拖到应用图标也进入独立窗口；安装或升级本身不改变系统的任何默认打开方式，只有手动打开某个格式的开关才会生效。1.6.9 起开关改用系统的异步默认程序接口，打开时会先请求系统确认再写入，修复了旧接口在 macOS 27 上静默失败、Finder 仍用 Xcode 打开 `.py` 的问题。
 - **实时指标（1.6.8）**：主侧栏新增入口，按 A股 / 港股 / 美股三列分组展示自选行情。每列顶部是市场名、条目数与当地交易状态；每行是名称与代码、今开/昨收、当日最低–最高区间条（含昨收刻度与现价圆点），右侧现价与涨跌额/涨跌幅，红涨绿跌但整体降低饱和度不刺眼。可用代码或名称联想添加，支持移除、右键「移到最前」、批量编辑整份自选、恢复默认自选，控制条上的 A− / A+ 可整体缩放行情字号；刷新间隔 5 秒 / 10 秒 / 30 秒 / 1 分钟 / 5 分钟，只在停留本页时轮询。数据来自腾讯公开行情接口，本机直连，无账号、无上传。
 - **代码 Diff**：粘贴两段代码，按行对比；带左右行号、红色删除、绿色新增。支持交换两侧、示例、清空与忽略行首尾空白。每侧最多 4,000 行，合计最多 2 MB。CRLF、CR 和 LF 会统一为换行符；保留末尾空行的差异。属于文本行级对比，不提供语法级或字符级 Diff。
 - **代码格式化（1.3.0）**：单框粘贴代码，自动识别语言并原位格式化；详见下方专节。
@@ -53,7 +53,7 @@
 - 「常用代码格式默认用 DevKit 打开」不是一个总开关，而是每个后缀一个独立开关，三列按字母顺序排开，共 24 项，不含 `.txt`，默认全部关闭。
 - 开关状态不另存一份偏好记录，而是每次进入页面、切回前台、以及每 2 秒实时读取系统的当前默认程序，所以显示的就是系统真相；关确认框关得晚、系统已拒绝更改时，开关位会自动回到实际状态。
 - 打开某一项时，先在后台把该格式当前的默认应用记进本机 `DevKit.defaultOpenersBackup`，再交给 DevKit；关闭时用这份记录恢复原应用。系统会为每一项单独弹确认框，选「继续使用 DevKit」才算生效，选原来的应用则保持原状。
-- 一次只处理一项，处理中该开关置灰并显示等待提示；`LSSet` 返回成功不代表系统已接受，因此改完会轮询等待落盘，超时提示「系统没有接受更改（可能取消了确认）」。
+- 一次只处理一项，处理中该开关置灰并显示等待提示。写入使用 `NSWorkspace.setDefaultApplication` 异步接口：系统需要用户同意时会先弹确认，确认后才落盘。若 60 秒内没有结果或系统直接拒绝，会提示原因，并给出「右键文件 → 显示简介 → 打开方式选 DevKit → 全部更改」的手动兜底路径。
 - 没有备份记录时（例如升级前已关联、或记录被清理），关闭后提示到访达手动改回。
 - `.ts` 与 MPEG-TS 视频同后缀，系统将其认作 `public.mpeg-2-transport-stream`，因此不在此列；`.tsx` 单独按 `com.microsoft.typescript` 处理。
 
@@ -159,7 +159,7 @@ Rust 的格式化引擎（rustfmt 连同它依赖的 librustc_driver 与 libLLVM
 
 ## 体积、许可证与来源
 
-- **体积**：不含格式化引擎的 DevKit.app 基线约 3.9 MB；web 引擎目录实测约 200 MB 未压缩（tar.gz 约 87 MB），native 目录当前约 274 MB（仍可能调整）。完整发行 zip 的实测体积在打包完成后于本节登记——1.6.8 两个包为安装包 93 MB（`DevKit-1.6.8-macOS-arm64.zip`）与源码包 199 MB（`DevKit-1.6.8-source.zip`，含 GPL 对应源码归档）。
+- **体积**：不含格式化引擎的 DevKit.app 基线约 3.9 MB；web 引擎目录实测约 200 MB 未压缩（tar.gz 约 87 MB），native 目录当前约 274 MB（仍可能调整）。完整发行 zip 的实测体积在打包完成后于本节登记——1.6.9 两个包为安装包 93 MB（`DevKit-1.6.9-macOS-arm64.zip`）与源码包 199 MB（`DevKit-1.6.9-source.zip`，含 GPL 对应源码归档）。
 - **DevKit 自研代码**（`Sources/`、`Tests/`、构建脚本）当前未在仓库中声明任何许可，也未随包附带 LICENSE 文件；不视为已采用 MIT 或其他任何许可，使用与分发以作者另行声明为准。
 - **内嵌第三方引擎**为独立开源项目，其许可证与法律文件**必须随包分发**：包内含完整 `THIRD_PARTY_NOTICES.txt` 与各组件 LICENSE 文件。web 侧登记——Node.js v24.22.2（MIT）、Prettier 3.9.10（MIT）、sql-formatter 15.9.0 及其传递依赖（MIT）、google-java-format 1.24.0（Apache-2.0）、内嵌 OpenJDK 21 JRE（GPLv2 + Classpath Exception）；各组件均附下载来源 URL 与 sha256。**GPL 对应源码**：内嵌 JRE 来自 Oracle OpenJDK 21.0.2（build 21.0.2+13-58，aarch64），对应源码归档随源码包分发于 `ThirdPartySources/openjdk-jdk21u-jdk-21.0.2+13.tar.gz`（SHA256 `4d8c8dd00164df0e344ed343d4ac20c1f30133f1029a83ff2c66c3557ed13a26`）；复构脚本为 `Resources/Formatters/web/licenses/build-jre.sh`（jlink：`--add-modules java.se,jdk.compiler --strip-debug --no-header-files --no-man-pages --compress=zip-6`，未改动 JRE 本身）。native 侧许可：ruff MIT、gofmt BSD-3-Clause、swift-format Apache-2.0 with Swift Exception、clang-format Apache-2.0 WITH LLVM-exception、shfmt BSD-3-Clause、rustfmt MIT OR Apache-2.0，各自许可证文件随包分发于 `Resources/Formatters/native/licenses/`。应用本身不捆绑任何闭源或收费组件。
 - **来源**：本地构建产物，无 GitHub Release 下载资产；本 README 与源码 zip 一一对应，源码 zip 可在装有 Xcode 命令行工具的 macOS 上离线重构。
@@ -171,7 +171,7 @@ Rust 的格式化引擎（rustfmt 连同它依赖的 librustc_driver 与 libLLVM
 ```bash
 bash test.sh            # 运行核心与原生回归测试
 bash build.sh           # 编译、内嵌引擎、ad-hoc 签名并验证，输出 build/DevKit.app
-bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.8-macOS-arm64.zip 与 DevKit-1.6.8-source.zip
+bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.9-macOS-arm64.zip 与 DevKit-1.6.9-source.zip
 ```
 
 构建流程：先在临时暂存目录编译，递归复制 `Resources/Formatters/web` 与 `native`，对内嵌的每一个 Mach-O 二进制/动态库逐一 ad-hoc 签名，再签名外层应用并做 `codesign --verify --strict --deep` 严格验证；全部通过后才把成品移到 `build/DevKit.app`，已有包保留在 `build/.previous.*`，不会原地覆盖正在运行的已签名应用。打包模式拒绝覆盖已存在的旧 zip。
@@ -199,7 +199,15 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.8-macO
 
 ## 当前验证状态
 
-### 1.6.8 本轮
+### 1.6.9 本轮
+
+- 修复「逐格式默认打开」在 macOS 27 上开关打开后 Finder 仍用 Xcode 打开的问题：写入改用 `NSWorkspace.setDefaultApplication(at:toOpen:)` 异步接口，由系统在需要时弹出确认，确认后才落库；旧 `LSSetDefaultRoleHandlerForContentType` 只作应用查找失败时的回退。
+- 等待期间开关保持置灰；系统拒绝会立即显示具体原因，60 秒无结果则提示「右键文件 → 显示简介 → 打开方式选 DevKit → 全部更改」的手动兜底路径，不再无反馈地空等。
+- `Info.plist` 的文件类型声明补齐到 21 个 UTI（含 `public.python-script`、`public.toml`、`public.yaml` 等），与开关列表对齐。
+- `xcrun swiftc` 类型检查通过；`bash test.sh` 860 项全绿。
+- 默认程序最终落库依赖用户在系统确认框点「继续使用 DevKit」，自动化会话无法代替该点击；若系统没有弹出确认，按提示用访达「全部更改」设置一次后，开关会读取到真实状态。
+
+### 1.6.8 历史
 
 - 实时指标页新增字号缩放按钮：控制条 `A−` / `A+` 五档缩放列头与行情行（0.9 / 1.0 / 1.15 / 1.3 / 1.5 倍），档位存本机，到顶到底自动置灰。
 - 最大档位下的排版退让：1.3 / 1.5 档不再在次级行拼「昨收」（区间条与悬停提示里仍有），次级行与涨跌小字的放大倍率封顶在 1.25 / 1.3，名称与价格仍按满档放大，三列在 1.5 档下都是「代码 开 价格」单行不截断。

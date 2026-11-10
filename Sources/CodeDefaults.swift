@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 import CoreServices
 import UniformTypeIdentifiers
 
@@ -18,6 +19,9 @@ final class CodeDefaultOpener: ObservableObject {
 
     private let defaults: UserDefaults
     private let backupKey = "DevKit.defaultOpenersBackup"
+    /// Finder 查询的是「所有角色」的默认处理器；只写 .editor 会让访达继续用
+    /// Xcode / VS Code 这类声明了 Editor 的应用。
+    private static let role: LSRolesMask = .all
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -67,7 +71,39 @@ final class CodeDefaultOpener: ObservableObject {
                 }
                 return
             }
-            LSSetDefaultRoleHandlerForContentType(identifier as CFString, .editor, target as CFString)
+            // 旧接口在 macOS 12 起废弃，新系统会静默忽略写入；改用 NSWorkspace
+            // 的异步接口。若系统需要确认，它会异步征求用户同意，确认后才会写入。
+            var setError: Error?
+            if let type = UTType(identifier),
+               let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: target) {
+                let semaphore = DispatchSemaphore(value: 0)
+                Task { @MainActor in
+                    do {
+                        try await NSWorkspace.shared.setDefaultApplication(at: appURL, toOpen: type)
+                    } catch {
+                        setError = error
+                    }
+                    semaphore.signal()
+                }
+                if semaphore.wait(timeout: .now() + 60) == .timedOut {
+                    DispatchQueue.main.async {
+                        self.pending.remove(ext)
+                        self.refresh()
+                        self.message = "系统没有弹出确认对 .\(ext) 的更改，请重试；也可以右键文件 → 显示简介 → 打开方式选择 DevKit 后点「全部更改」"
+                    }
+                    return
+                }
+            } else {
+                LSSetDefaultRoleHandlerForContentType(identifier as CFString, Self.role, target as CFString)
+            }
+            if let setError {
+                DispatchQueue.main.async {
+                    self.pending.remove(ext)
+                    self.refresh()
+                    self.message = "系统没有确认对 .\(ext) 的更改（\(setError.localizedDescription)）"
+                }
+                return
+            }
             // The preference only lands once the user accepts the system prompt.
             var confirmed = false
             for _ in 0..<40 {
@@ -103,6 +139,6 @@ final class CodeDefaultOpener: ObservableObject {
     }
 
     private func readHandler(_ identifier: String) -> String? {
-        LSCopyDefaultRoleHandlerForContentType(identifier as CFString, .editor)?.takeRetainedValue() as String?
+        LSCopyDefaultRoleHandlerForContentType(identifier as CFString, Self.role)?.takeRetainedValue() as String?
     }
 }
