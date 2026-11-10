@@ -107,9 +107,10 @@ if [[ "${1:-}" == "package" ]]; then
   rsync -a --exclude '.DS_Store' "$ROOT/Resources/" "$DST/Resources/"
   if [[ -d "$ROOT/ThirdPartySources" ]]; then
     mkdir -p "$DST/ThirdPartySources"
-    # rustfmt-engine is a local-only stash (~220 MB, deliberately not shipped);
-    # keep it out of the source archive so downloads stay small.
-    rsync -a --exclude 'rustfmt-engine' "$ROOT/ThirdPartySources/" "$DST/ThirdPartySources/"
+    # The OpenJDK source archive travels with the source package: the bundled
+    # JRE is GPLv2 + Classpath Exception, so its corresponding source has to be
+    # distributed alongside.
+    rsync -a "$ROOT/ThirdPartySources/" "$DST/ThirdPartySources/"
   fi
   (cd "$SRC" && COPYFILE_DISABLE=1 zip -r -X -y -q "$SRC_ZIP" DevKit)
 

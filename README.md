@@ -209,7 +209,7 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.6-macO
 - 对 `.rs` 的表现为：格式化页提示「Rust 格式化引擎未随本版安装包分发，保留原文；其余语言不受影响。」，代码高亮、语言检测、阅读器都不变。
 - `DevKit.app` 399 MB → 207 MB；发行 zip 160 MB → 97 MB，源码 zip 273 MB → 208 MB（源码包同样排除这份本地留档）。
 - 复核：成品包内 ruff、gofmt、swift-format、clang-format-safe、shfmt-safe 与 javascript / typescript / html / css / java / sql（node 与 JRE）逐个实跑正常；`bash test.sh` 660 项断言全绿（较 1.6.4 的 656 项新增 4 条），其中这 4 条专门验证 `.rs` 的提示文案。
-- Rust 引擎留在仓库外的 `ThirdPartySources/rustfmt-engine/`（该目录被 `.gitignore` 忽略，也不进任何 zip），将来要恢复格式化直接搬回 `Resources/Formatters/native/{bin,lib}` 并补回 manifest 条目即可。
+- 这三样当时搬到仓库外的 `ThirdPartySources/rustfmt-engine/`（该目录被 `.gitignore` 忽略，也不进任何 zip）。1.6.6 之后这份本地留档也已删除，磁盘上不再保留约 193 MB 的 Rust 引擎二进制；将来若要恢复 Rust 格式化，需重新获取 `rustfmt`、`librustc_driver` 与 `libLLVM`（rustup 与 LLVM 发行包），放回 `Resources/Formatters/native/{bin,lib}` 并补回 `manifest.json` 条目。
 
 ### 1.6.4 历史
 
@@ -272,7 +272,7 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.6-macO
 ### 1.3.0 历史
 
 - 版本号升级为 **1.3.0 / build 5**（`Info.plist`）。
-- 构建脚本：递归内嵌 `Resources/Formatters/web` 与 `native`、逐 Mach-O 签名、严格深签名验证、暂存编译成功才移动成品、打包模式生成 app/source 双 zip 且不覆盖旧包；源码包另含 `ThirdPartySources/` 的 OpenJDK 21 对应源归档。
+- 构建脚本：递归内嵌 `Resources/Formatters/web` 与 `native`、逐 Mach-O 签名、严格深签名验证、暂存编译成功才移动成品、打包模式生成 app/source 双 zip 且不覆盖旧包；源码包另含 `ThirdPartySources/` 的 OpenJDK 21 对应源归档（GPL 对应源码，必须随源码包分发）。
 - 14 语言范围：JSON、JavaScript、TypeScript、HTML、CSS、Python、Go、Swift、Java、C、C++、SQL、Shell、Rust；引擎版本与边界以上表为准。
 - 代码格式化草稿按 `CodeDraftStore.swift` 实际实现：路径 `~/Library/Application Support/<bundleID>/CodeDraft.json`（正式版 `com.visero.devkit`，预览/测试按 bundle ID 或注入目录隔离）、目录 0700/文件 0600、临时文件原子替换、串行队列版本守卫、输入 0.5 s 防抖、格式化/撤销/清空/`NSApplication.willTerminateNotification` 同步 flush、清空写空字符串；隐私条款为「仅此页落盘」。
 - **自动化验证事实**：470 项断言通过（核心 308 / 格式化 26 / 语言识别 33 / 原生控件 62 / 草稿持久化 16 / 原生替换撤销 10 / store 集成 12 / SIGPIPE 与大输出截断修复回归 3）；web 引擎自检 48 项通过；native preflight 自检 32 项通过（含 C 437 KB 尾完整幂等、C++ 77 KB raw、Rust 78 KB、Shell 84 KB 大输入 tail 完整）；14 语言各取正样本格式化结果幂等（连续两次输出一致）。
