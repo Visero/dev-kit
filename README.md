@@ -159,7 +159,7 @@ Rust 的格式化引擎（rustfmt 连同它依赖的 librustc_driver 与 libLLVM
 
 ## 体积、许可证与来源
 
-- **体积**：不含格式化引擎的 DevKit.app 基线约 3.9 MB；web 引擎目录实测约 200 MB 未压缩（tar.gz 约 87 MB），native 目录当前约 274 MB（仍可能调整）。完整发行 zip 的实测体积在打包完成后于本节登记。
+- **体积**：不含格式化引擎的 DevKit.app 基线约 3.9 MB；web 引擎目录实测约 200 MB 未压缩（tar.gz 约 87 MB），native 目录当前约 274 MB（仍可能调整）。完整发行 zip 的实测体积在打包完成后于本节登记——1.6.8 两个包为安装包 93 MB（`DevKit-1.6.8-macOS-arm64.zip`）与源码包 199 MB（`DevKit-1.6.8-source.zip`，含 GPL 对应源码归档）。
 - **DevKit 自研代码**（`Sources/`、`Tests/`、构建脚本）当前未在仓库中声明任何许可，也未随包附带 LICENSE 文件；不视为已采用 MIT 或其他任何许可，使用与分发以作者另行声明为准。
 - **内嵌第三方引擎**为独立开源项目，其许可证与法律文件**必须随包分发**：包内含完整 `THIRD_PARTY_NOTICES.txt` 与各组件 LICENSE 文件。web 侧登记——Node.js v24.22.2（MIT）、Prettier 3.9.10（MIT）、sql-formatter 15.9.0 及其传递依赖（MIT）、google-java-format 1.24.0（Apache-2.0）、内嵌 OpenJDK 21 JRE（GPLv2 + Classpath Exception）；各组件均附下载来源 URL 与 sha256。**GPL 对应源码**：内嵌 JRE 来自 Oracle OpenJDK 21.0.2（build 21.0.2+13-58，aarch64），对应源码归档随源码包分发于 `ThirdPartySources/openjdk-jdk21u-jdk-21.0.2+13.tar.gz`（SHA256 `4d8c8dd00164df0e344ed343d4ac20c1f30133f1029a83ff2c66c3557ed13a26`）；复构脚本为 `Resources/Formatters/web/licenses/build-jre.sh`（jlink：`--add-modules java.se,jdk.compiler --strip-debug --no-header-files --no-man-pages --compress=zip-6`，未改动 JRE 本身）。native 侧许可：ruff MIT、gofmt BSD-3-Clause、swift-format Apache-2.0 with Swift Exception、clang-format Apache-2.0 WITH LLVM-exception、shfmt BSD-3-Clause、rustfmt MIT OR Apache-2.0，各自许可证文件随包分发于 `Resources/Formatters/native/licenses/`。应用本身不捆绑任何闭源或收费组件。
 - **来源**：本地构建产物，无 GitHub Release 下载资产；本 README 与源码 zip 一一对应，源码 zip 可在装有 Xcode 命令行工具的 macOS 上离线重构。
@@ -175,6 +175,8 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.8-macO
 ```
 
 构建流程：先在临时暂存目录编译，递归复制 `Resources/Formatters/web` 与 `native`，对内嵌的每一个 Mach-O 二进制/动态库逐一 ad-hoc 签名，再签名外层应用并做 `codesign --verify --strict --deep` 严格验证；全部通过后才把成品移到 `build/DevKit.app`，已有包保留在 `build/.previous.*`，不会原地覆盖正在运行的已签名应用。打包模式拒绝覆盖已存在的旧 zip。
+
+构建残留都在 `.gitignore` 内，可随时清理，不影响已安装应用：`build/` 下 `test.sh` 产出的各 `*-tests` 二进制、`build/.previous.*` 旧包，以及 `.build/` 与 `build/.staging.*`（异常中断时余下的暂存目录）。仓库只留当前版本的两个 zip，升级后应删掉上一版安装包与源码包，否则每次都多占约 300 MB。保留的 `Resources/Formatters/` 与 `ThirdPartySources/openjdk-*.tar.gz` 是运行与 GPL 合规必需，不能当作残留删除。
 
 - `Sources/ToolCore.swift`：Diff、JSON、时间转换逻辑
 - `Sources/DevKitApp.swift`：应用入口、状态、导航与主题
@@ -200,8 +202,11 @@ bash build.sh package   # 同上，并在仓库根目录生成 DevKit-1.6.8-macO
 ### 1.6.8 本轮
 
 - 实时指标页新增字号缩放按钮：控制条 `A−` / `A+` 五档缩放列头与行情行（0.9 / 1.0 / 1.15 / 1.3 / 1.5 倍），档位存本机，到顶到底自动置灰。
+- 最大档位下的排版退让：1.3 / 1.5 档不再在次级行拼「昨收」（区间条与悬停提示里仍有），次级行与涨跌小字的放大倍率封顶在 1.25 / 1.3，名称与价格仍按满档放大，三列在 1.5 档下都是「代码 开 价格」单行不截断。
 - 默认自选从 5 条扩到 12 条，覆盖 A股、港股、美股主要指数：上证、深证成指、创业板指、沪深300、恒生、恒生科技、道琼斯、纳斯达克、标普500，另配茅台、腾讯、苹果；旧出厂列表（未被改动）升级时自动替换成新列表，自定义列表不动。
-- `xcrun swiftc` 类型检查通过；股票单测从 182 条增至 199 条（默认指数覆盖、旧列表迁移、字号档位边界与持久化）。
+- 新纳入默认的指数代码先打腾讯接口实测有数再写进默认（沪深300 4059.11、创业板指 2494.40、恒生 24562.23、恒生科技 4090.63、道琼斯 52389.75、纳斯达克 25253.14、标普500 7549.94），不是照代码表猜的。
+- `xcrun swiftc` 类型检查通过；`bash test.sh` 860 项全绿（1.6.7 为 843），股票断言从 182 条增至 199 条（默认指数覆盖、旧列表迁移、字号档位边界与持久化）。
+- `bash build.sh` 产出 1.6.8 build 18，`codesign --verify --strict --deep` 通过；`bash build.sh package` 出两个 zip。实机复核：首启 12 条自动到位（A股 5 / 港股 3 / 美股 4）、`A+` 逐档放大至 1.5 后置灰、重启后仍停原档位、缩回 1.0 排版正常；版本已打 tag `v1.6.8`。
 
 ### 1.6.7 历史
 
