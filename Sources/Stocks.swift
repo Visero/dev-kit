@@ -1,23 +1,64 @@
 import Foundation
 
+// MARK: - Markets
+/// The three markets the page groups into columns. A symbol carries its market
+/// in its prefix, so no extra bookkeeping is needed per row.
+enum StockMarketKind: String, CaseIterable, Sendable, Identifiable {
+    case aShare = "A股"
+    case hk = "港股"
+    case us = "美股"
+
+    var id: String { rawValue }
+
+    /// "sh600519" / "sz399001" / "bj830799" are A shares, "hk00700" is Hong
+    /// Kong, "usAAPL" and "us.DJI" are US listings and indices.
+    static func kind(of symbol: String) -> StockMarketKind? {
+        let text = symbol.lowercased()
+        if text.hasPrefix("hk") { return .hk }
+        if text.hasPrefix("us") { return .us }
+        if ["sh", "sz", "bj"].contains(where: text.hasPrefix) { return .aShare }
+        return nil
+    }
+
+    /// The exchange's own clock decides the session, so US daylight saving and
+    /// Hong Kong hours need no arithmetic here.
+    var timeZone: TimeZone {
+        switch self {
+        case .aShare: return TimeZone(secondsFromGMT: 8 * 60 * 60) ?? .current
+        case .hk: return TimeZone(identifier: "Asia/Hong_Kong") ?? TimeZone(secondsFromGMT: 8 * 60 * 60) ?? .current
+        case .us: return TimeZone(identifier: "America/New_York") ?? TimeZone(secondsFromGMT: -5 * 60 * 60) ?? .current
+        }
+    }
+
+    var hint: String {
+        switch self {
+        case .aShare: return "6 位代码，如 600519"
+        case .hk: return "5 位代码，如 00700"
+        case .us: return "字母代码，如 AAPL"
+        }
+    }
+}
+
 // MARK: - Model
-/// One real-time A-share / index snapshot, parsed from the Tencent quote feed.
-/// Numbers stay as parsed text values; no currency conversion, no persistence.
+/// One real-time snapshot, parsed from the Tencent quote feed. Money and volume
+/// are normalised to 万元 and 手 so the formatter and the tests stay uniform
+/// across the three markets.
 struct StockQuote: Equatable, Sendable, Identifiable {
-    let symbol: String          // "sh600519"
+    let symbol: String          // "sh600519" / "hk00700" / "usAAPL"
     let name: String
+    let market: StockMarketKind
     let price: Double
     let prevClose: Double
     let open: Double
     let high: Double
     let low: Double
-    let volumeLots: Double       // 手
-    let amountWan: Double        // 万元
+    let volumeLots: Double       // 手 (HK/US share counts divided by 100)
+    let amountWan: Double        // 万元 (HK/US turnover divided by 10,000)
     let change: Double
     let changePercent: Double
     let turnoverPercent: Double
     let pe: Double
-    let marketCapYi: Double      // 总市值（亿元）
+    let marketCapYi: Double      // 总市值（亿元）; 0 when the feed gives nothing usable
     let stamp: String            // "2026-11-10 14:20:56"
     let isIndex: Bool
 
@@ -30,14 +71,17 @@ struct StockQuote: Equatable, Sendable, Identifiable {
     // A suspended or untraded symbol reports price 0.
     var hasPrice: Bool { price > 0 }
 
+    /// "600519" — the market prefix is already implied by the column.
+    var code: String { String(symbol.dropFirst(2)) }
+
+    var displaySymbol: String { code.uppercased() }
+
     /// Where the current price sits inside today's low–high band, 0...1.
     /// nil when the band is degenerate (no trading, or a one-tick range).
     var dayPosition: Double? {
         guard hasPrice, high > low else { return nil }
         return min(1, max(0, (price - low) / (high - low)))
     }
-
-    var displaySymbol: String { symbol.uppercased() }
 }
 
 // MARK: - Parsing
@@ -57,20 +101,85 @@ enum StockFeedError: LocalizedError, Sendable {
 }
 
 enum StockParser {
-    /// Accepts "600519", "sh600519", "SH600519", "000001", "bj830799".
-    /// Six bare digits are prefixed by exchange rules; ambiguous codes such as
-    /// 000001 resolve to Shenzhen (平安银行) — indices need the explicit sh prefix.
+    /// Listing suffixes the feed appends to US codes in its payload
+    /// ("AAPL.OQ", "BABA.N", "TCTZF.PS"). They are not valid quote keys, so a
+    /// ticker drops them; "BRK.B" keeps its own dot because "B" is no venue.
+    static let listingSuffixes: Set<String> = ["OQ", "N", "PS", "NY", "US", "NASDAQ", "AMEX", "PK", "OB", "OTC", "NX"]
+
+    static func isDigit(_ character: Character) -> Bool { character.isASCII && character.isNumber }
+
+    /// Uppercases a ticker, drops a listing suffix, validates the shape.
+    /// Accepts "AAPL", "aapl.oq", "BRK.B", ".DJI". Digits are refused so a
+    /// half-typed code such as "hs700" is reported rather than turned into a
+    /// bogus US symbol.
+    static func ticker(_ raw: String) -> String? {
+        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard !text.isEmpty, text.count <= 12 else { return nil }
+        guard text.allSatisfy({ $0.isASCII && ($0.isLetter || $0 == ".") }) else { return nil }
+        guard let first = text.first, (first.isASCII && first.isLetter) || first == "." else { return nil }
+        if first == ".", text.count < 2 { return nil }
+        while let dot = text.lastIndex(of: ".") {
+            let head = String(text[text.startIndex..<dot])
+            let suffix = String(text[text.index(after: dot)...])
+            guard !head.isEmpty, listingSuffixes.contains(suffix) else { break }
+            text = head
+        }
+        guard !text.isEmpty, text != ".", text.count <= 10 else { return nil }
+        return text
+    }
+
+    /// Accepts A-share codes ("600519", "sh600519"), Hong Kong codes ("00700",
+    /// "hk700", "hkHSI") and US tickers ("AAPL", "aapl.oq", "us.DJI").
+    /// Ambiguous bare codes are resolved by length: six digits are A shares,
+    /// five are Hong Kong; letters are US.
     static func normalize(_ raw: String) -> String? {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !text.isEmpty else { return nil }
+
+        if text.hasPrefix("hk") {
+            let rest = String(text.dropFirst(2))
+            guard rest.count >= 1, rest.count <= 6 else { return nil }
+            if rest.count <= 5, rest.allSatisfy(isDigit) {
+                return "hk" + String(repeating: "0", count: 5 - rest.count) + rest
+            }
+            guard let code = ticker(rest), !code.contains(".") else { return nil }
+            return "hk" + code
+        }
+        if text.hasPrefix("us") {
+            guard let code = ticker(String(text.dropFirst(2))) else { return nil }
+            return "us" + code
+        }
         for prefix in ["sh", "sz", "bj"] where text.hasPrefix(prefix) {
             let digits = text.dropFirst(prefix.count)
-            guard digits.count == 6, digits.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
-            return String(text)
+            guard digits.count == 6, digits.allSatisfy(isDigit) else { return nil }
+            return text
         }
-        guard text.count == 6, text.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
-        if text.hasPrefix("92") || text.hasPrefix("8") || text.hasPrefix("4") { return "bj\(text)" }
-        if text.hasPrefix("6") || text.hasPrefix("9") || text.hasPrefix("5") { return "sh\(text)" }
-        return "sz\(text)"
+        if text.count == 6, text.allSatisfy(isDigit) {
+            if text.hasPrefix("92") || text.hasPrefix("8") || text.hasPrefix("4") { return "bj\(text)" }
+            if text.hasPrefix("6") || text.hasPrefix("9") || text.hasPrefix("5") { return "sh\(text)" }
+            return "sz\(text)"
+        }
+        if text.count <= 5, text.count >= 1, text.allSatisfy(isDigit) {
+            return "hk" + String(repeating: "0", count: 5 - text.count) + text
+        }
+        if let code = ticker(text) { return "us\(code)" }
+        return nil
+    }
+
+    /// Splits a pasted list into canonical symbols, in order, duplicates
+    /// removed; anything unrecognised is reported back instead of guessed.
+    static func parseList(_ text: String) -> (symbols: [String], rejected: [String]) {
+        let separators = CharacterSet(charactersIn: " \t\r\n,;，、；　")
+        var symbols: [String] = []
+        var rejected: [String] = []
+        for token in text.components(separatedBy: separators) where !token.isEmpty {
+            if let symbol = normalize(token) {
+                if !symbols.contains(symbol) { symbols.append(symbol) }
+            } else {
+                rejected.append(token)
+            }
+        }
+        return (symbols, rejected)
     }
 
     /// Splits a quote payload into (symbol, fields) pairs.
@@ -93,27 +202,51 @@ enum StockParser {
               let prevClose = Double(fields[4]) else { return nil }
         let name = fields[1].trimmingCharacters(in: .whitespaces)
         guard !name.isEmpty else { return nil }
-        func number(_ index: Int) -> Double {
-            index < fields.count ? (Double(fields[index]) ?? 0) : 0
-        }
+        let market = StockMarketKind.kind(of: symbol) ?? .aShare
+        func text(_ index: Int) -> String { index < fields.count ? fields[index] : "" }
+        func number(_ index: Int) -> Double { Double(text(index)) ?? 0 }
+
+        let isAShare = market == .aShare
+        let rawVolume = number(36)
+        let rawAmount = number(37)
         return StockQuote(
             symbol: symbol,
             name: name,
+            market: market,
             price: price,
             prevClose: prevClose,
             open: number(5),
             high: number(33),
             low: number(34),
-            volumeLots: number(36),
-            amountWan: number(37),
+            volumeLots: isAShare ? rawVolume : rawVolume / 100,
+            amountWan: isAShare ? rawAmount : rawAmount / 10_000,
             change: number(31),
             changePercent: number(32),
             turnoverPercent: number(38),
             pe: number(39),
-            marketCapYi: number(45),
-            stamp: formatStamp(fields.count > 30 ? fields[30] : ""),
-            isIndex: symbol.hasPrefix("sh000") || symbol.hasPrefix("sz399") || symbol.hasPrefix("bj")
+            // The feed's market-cap field means different things per market and
+            // is plainly wrong for US listings, so it is kept only where it is
+            // the total in 亿元.
+            marketCapYi: market == .us ? 0 : number(45),
+            stamp: formatStamp(text(30)),
+            isIndex: isIndex(symbol: symbol)
         )
+    }
+
+    /// A-share indices are "sh000…" and "sz399…"; Hong Kong indices use letter
+    /// codes (HSI, HSTECH); US indices keep a leading dot (".DJI", ".INX").
+    static func isIndex(symbol: String) -> Bool {
+        let code = String(symbol.dropFirst(2)).uppercased()
+        switch StockMarketKind.kind(of: symbol) ?? .aShare {
+        case .aShare:
+            return (symbol.hasPrefix("sh") && code.hasPrefix("000"))
+                || (symbol.hasPrefix("sz") && code.hasPrefix("399"))
+        case .hk:
+            return !code.allSatisfy(isDigit)
+        case .us:
+            return code.hasPrefix(".")
+                || ["DJI", "INX", "IXIC", "NDX", "SPX", "VIX", "RUT", "SOX"].contains(code)
+        }
     }
 
     /// Parses a whole response; rows come back in the requested order so a
@@ -126,20 +259,36 @@ enum StockParser {
         return symbols.compactMap { code in parsed.first { $0.symbol == code } }
     }
 
-    /// "20261110142056" → "2026-11-10 14:20:56"
+    /// A shares use a 14-digit stamp; Hong Kong and US use readable dates.
+    /// Both are normalised to "2026-11-10 14:20:56".
     static func formatStamp(_ raw: String) -> String {
-        guard raw.count == 14, raw.allSatisfy({ $0.isASCII && $0.isNumber }) else { return "" }
-        let parts = [raw.prefix(4), raw.dropFirst(4).prefix(2), raw.dropFirst(6).prefix(2)]
-        let time = [raw.dropFirst(8).prefix(2), raw.dropFirst(10).prefix(2), raw.dropFirst(12).prefix(2)]
-        return "\(parts[0])-\(parts[1])-\(parts[2]) \(time[0]):\(time[1]):\(time[2])"
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return "" }
+        if text.count == 14, text.allSatisfy(isDigit) {
+            let parts = [text.prefix(4), text.dropFirst(4).prefix(2), text.dropFirst(6).prefix(2)]
+            let time = [text.dropFirst(8).prefix(2), text.dropFirst(10).prefix(2), text.dropFirst(12).prefix(2)]
+            return "\(parts[0])-\(parts[1])-\(parts[2]) \(time[0]):\(time[1]):\(time[2])"
+        }
+        let halves = text.split(separator: " ")
+        guard halves.count == 2 else { return "" }
+        let date = halves[0].replacingOccurrences(of: "/", with: "-")
+        let dateParts = date.split(separator: "-")
+        let timeParts = halves[1].split(separator: ":")
+        guard dateParts.count == 3, timeParts.count == 3,
+              dateParts[0].count == 4, dateParts[1].count == 2, dateParts[2].count == 2,
+              timeParts.allSatisfy({ $0.count == 2 && $0.allSatisfy(isDigit) }),
+              dateParts.allSatisfy({ $0.allSatisfy(isDigit) }) else { return "" }
+        return "\(date) \(halves[1])"
     }
 
-    /// Search hints: v_hint="sh~600519~贵州茅台~gzmt~GP-A^sz~000001~平安银行~payh~GP-A"
+    /// Search hints: v_hint="sh~600519~贵州茅台~gzmt~GP-A^hk~00700~腾讯控股~txkg~GP"
     struct Hint: Equatable, Sendable, Identifiable {
         let symbol: String
         let name: String
         let kind: String
         var id: String { symbol }
+        var market: StockMarketKind { StockMarketKind.kind(of: symbol) ?? .aShare }
+        var code: String { String(symbol.dropFirst(2)).uppercased() }
     }
 
     static func hints(fromPayload text: String, limit: Int = 6) -> [Hint] {
@@ -153,9 +302,19 @@ enum StockParser {
             let market = parts[0].trimmingCharacters(in: .whitespaces)
             let code = parts[1].trimmingCharacters(in: .whitespaces)
             let name = unicodeEscapes(parts[2]).trimmingCharacters(in: .whitespaces)
-            guard ["sh", "sz", "bj"].contains(market), code.count == 6, !name.isEmpty else { continue }
-            guard !result.contains(where: { $0.symbol == market + code }) else { continue }
-            result.append(Hint(symbol: market + code, name: name, kind: parts[4]))
+            guard !name.isEmpty else { continue }
+            let symbol: String?
+            switch market {
+            case "sh", "sz", "bj":
+                symbol = code.count == 6 && code.allSatisfy(isDigit) ? market + code : nil
+            case "hk", "us":
+                symbol = normalize(market + code)
+            default:
+                symbol = nil
+            }
+            guard let resolved = symbol else { continue }
+            guard !result.contains(where: { $0.symbol == resolved }) else { continue }
+            result.append(Hint(symbol: resolved, name: name, kind: parts[4]))
             if result.count >= limit { break }
         }
         return result
@@ -187,7 +346,7 @@ enum StockParser {
     }
 }
 
-// MARK: - Market phase (Beijing time, weekday session windows, no holiday calendar)
+// MARK: - Market phase (each exchange's own clock, weekday windows, no holiday calendar)
 enum StockMarketPhase: String, Sendable {
     case preOpen = "未开盘"
     case auction = "集合竞价"
@@ -200,23 +359,41 @@ enum StockMarketPhase: String, Sendable {
 }
 
 enum StockMarket {
-    static let beijingOffsetMinutes = 480
+    static func phase(at now: Date) -> StockMarketPhase { phase(for: .aShare, at: now) }
 
-    static func phase(at now: Date) -> StockMarketPhase {
+    /// Sessions per market, read on that market's clock so US daylight saving
+    /// needs no special case. Legal holidays are not modelled.
+    static func phase(for market: StockMarketKind, at now: Date) -> StockMarketPhase {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: beijingOffsetMinutes * 60)!
+        calendar.timeZone = market.timeZone
         let weekday = calendar.component(.weekday, from: now)   // 1 = Sunday
         guard weekday != 1 && weekday != 7 else { return .holiday }
-        let hour = calendar.component(.hour, from: now)
-        let minute = calendar.component(.minute, from: now)
-        let clock = hour * 60 + minute
-        switch clock {
-        case ..<(9 * 60 + 15): return .preOpen
-        case (9 * 60 + 15)..<(9 * 60 + 30): return .auction
-        case (9 * 60 + 30)..<(11 * 60 + 30): return .trading
-        case (11 * 60 + 30)..<(13 * 60): return .lunch
-        case (13 * 60)...(15 * 60): return .trading
-        default: return .closed
+        let clock = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+        switch market {
+        case .aShare:
+            switch clock {
+            case ..<(9 * 60 + 15): return .preOpen
+            case (9 * 60 + 15)..<(9 * 60 + 30): return .auction
+            case (9 * 60 + 30)..<(11 * 60 + 30): return .trading
+            case (11 * 60 + 30)..<(13 * 60): return .lunch
+            case (13 * 60)...(15 * 60): return .trading
+            default: return .closed
+            }
+        case .hk:
+            switch clock {
+            case ..<(9 * 60 + 15): return .preOpen
+            case (9 * 60 + 15)..<(9 * 60 + 30): return .auction
+            case (9 * 60 + 30)..<(12 * 60): return .trading
+            case (12 * 60)..<(13 * 60): return .lunch
+            case (13 * 60)..<(16 * 60): return .trading
+            default: return .closed
+            }
+        case .us:
+            switch clock {
+            case (9 * 60 + 30)..<(16 * 60): return .trading
+            case (16 * 60)...: return .closed
+            default: return .preOpen
+            }
         }
     }
 }
@@ -229,7 +406,7 @@ final class StockFeed {
     private static let session: URLSession = {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
-        config.httpAdditionalHeaders = ["User-Agent": "DevKit/1.6 (macOS)"]
+        config.httpAdditionalHeaders = ["User-Agent": "DevKit/1.7 (macOS)"]
         config.urlCache = nil
         return URLSession(configuration: config)
     }()
@@ -241,6 +418,7 @@ final class StockFeed {
     }
 
     /// Fetches quotes for the given symbols; completion runs on the main queue.
+    /// One request carries every market, so a page refresh stays a single call.
     static func quotes(for symbols: [String], completion: @escaping (Result<[StockQuote], Error>) -> Void) {
         guard !symbols.isEmpty else { completion(.success([])); return }
         guard let url = URL(string: quoteEndpoint + symbols.joined(separator: ",")) else {
@@ -289,25 +467,30 @@ final class StockFeed {
 final class StockBoard: ObservableObject {
     static let watchlistKey = "DevKit.stockWatchlist"
     static let intervalKey = "DevKit.stockRefreshInterval"
-    static let defaultSymbols = ["sh000001", "sz399001", "sh600519"]
+    static let intervalOptions = [5, 10, 30, 60, 300]
+    static let defaultSymbols = ["sh000001", "sz399001", "sh600519", "hk00700", "usAAPL"]
     static let defaultInterval = 10
 
     @Published private(set) var symbols: [String]
     @Published private(set) var quotes: [String: StockQuote] = [:]
+    @Published private(set) var phases: [StockMarketKind: StockMarketPhase] = [:]
     @Published private(set) var loading = false
     @Published var error = ""
+    @Published var info = ""
     @Published private(set) var lastUpdated: Date?
     @Published var interval: Int {
         didSet {
-            guard [5, 10, 30].contains(interval) else { interval = Self.defaultInterval; return }
+            guard Self.intervalOptions.contains(interval) else { interval = Self.defaultInterval; return }
             defaults.set(interval, forKey: Self.intervalKey)
             if running { restartTimer() }
         }
     }
-    @Published var phase: StockMarketPhase = StockMarket.phase(at: Date())
     @Published var query = ""
     @Published var hints: [StockParser.Hint] = []
     @Published var hintError = ""
+    @Published var isEditing = false
+    @Published var editDraft = ""
+    @Published var editNote = ""
 
     private let defaults: UserDefaults
     private var timer: Timer?
@@ -319,10 +502,19 @@ final class StockBoard: ObservableObject {
         let saved = defaults.stringArray(forKey: Self.watchlistKey) ?? Self.defaultSymbols
         symbols = saved.isEmpty ? [] : saved
         let savedInterval = defaults.integer(forKey: Self.intervalKey)
-        interval = [5, 10, 30].contains(savedInterval) ? savedInterval : Self.defaultInterval
+        interval = Self.intervalOptions.contains(savedInterval) ? savedInterval : Self.defaultInterval
+        phases = [:]
     }
 
     var ordered: [StockQuote] { symbols.compactMap { quotes[$0] } }
+
+    func symbols(in market: StockMarketKind) -> [String] {
+        symbols.filter { StockMarketKind.kind(of: $0) == market }
+    }
+
+    func phase(for market: StockMarketKind) -> StockMarketPhase {
+        phases[market] ?? StockMarket.phase(for: market, at: Date())
+    }
 
     func start() {
         guard !running else { return }
@@ -346,7 +538,10 @@ final class StockBoard: ObservableObject {
     }
 
     func refresh() {
-        phase = StockMarket.phase(at: Date())
+        let now = Date()
+        var current: [StockMarketKind: StockMarketPhase] = [:]
+        for market in StockMarketKind.allCases { current[market] = StockMarket.phase(for: market, at: now) }
+        phases = current
         guard !symbols.isEmpty else {
             quotes = [:]; lastUpdated = Date(); error = ""; loading = false
             return
@@ -378,7 +573,7 @@ final class StockBoard: ObservableObject {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         guard let symbol = StockParser.normalize(trimmed) else {
-            error = "请输入 6 位代码（如 600519）或用名称搜索。"
+            error = "请输入代码或用名称搜索：A股 6 位（600519）、港股 5 位（00700）、美股字母代码（AAPL）。"
             return
         }
         add(symbol: symbol)
@@ -392,7 +587,7 @@ final class StockBoard: ObservableObject {
         }
         symbols.append(symbol)
         persistSymbols()
-        error = ""
+        error = ""; info = ""
         query = ""; hints = []; hintError = ""
         if running { refresh() }
     }
@@ -414,6 +609,39 @@ final class StockBoard: ObservableObject {
     func resetSymbols() {
         symbols = Self.defaultSymbols
         persistSymbols()
+        if running { refresh() }
+    }
+
+    // MARK: Batch edit
+
+    func beginEdit() {
+        editDraft = symbols.joined(separator: "\n")
+        editNote = ""
+        isEditing = true
+    }
+
+    func cancelEdit() {
+        isEditing = false
+        editNote = ""
+    }
+
+    /// Replaces the watchlist with whatever the draft resolves to. Unrecognised
+    /// tokens are reported, never guessed, and the list is left untouched when
+    /// nothing resolves.
+    func applyEdit() {
+        let result = StockParser.parseList(editDraft)
+        guard !result.symbols.isEmpty else {
+            editNote = "没有识别到任何代码，列表没有改动。"
+            return
+        }
+        symbols = result.symbols
+        quotes = quotes.filter { symbols.contains($0.key) }
+        persistSymbols()
+        info = result.rejected.isEmpty
+            ? ""
+            : "批量编辑跳过 \(result.rejected.count) 个无法识别的项：\(result.rejected.prefix(3).joined(separator: "、"))"
+        editNote = ""
+        isEditing = false
         if running { refresh() }
     }
 
@@ -483,5 +711,13 @@ enum StockFormat {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "HH:mm:ss"
         return formatter.string(from: date)
+    }
+
+    static func intervalLabel(_ seconds: Int) -> String {
+        switch seconds {
+        case 60: return "1 分钟"
+        case 300: return "5 分钟"
+        default: return "\(seconds) 秒"
+        }
     }
 }
