@@ -18,6 +18,8 @@ mkdir -p "$OUT"
 # NOTE: cleanup is limited to build/ staging/temp dirs. It never touches the
 # user's App Support private drafts (~/Library/Application Support), which are
 # user real content and must not be swept into archives or deleted.
+# Drop empty staging directories left behind by interrupted builds.
+find "$OUT" -maxdepth 1 -type d -name '.staging.*' -empty -exec rmdir {} + 2>/dev/null || true
 STAGE="$(mktemp -d "$OUT/.staging.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 APP="$STAGE/DevKit.app"
@@ -66,6 +68,16 @@ if [[ -d "$OUT/DevKit.app" ]]; then
 fi
 mv "$APP" "$OUT/DevKit.app"
 trap - EXIT
+# Keep only the newest pre-build bundle for rollback; older backups are full
+# copies and accumulate quickly (each is roughly the size of the whole app).
+shopt -s nullglob
+backups=("$OUT"/.previous.*)
+shopt -u nullglob
+if (( ${#backups[@]} > 1 )); then
+  ls -dt "${backups[@]}" | tail -n +2 | while IFS= read -r stale; do
+    [[ -n "$stale" ]] && rm -rf "$stale"
+  done
+fi
 printf 'Built: %s (version %s build %s)\n' "$OUT/DevKit.app" "$VERSION" "$BUILD"
 
 # --- 7. Optional packaging -------------------------------------------------
