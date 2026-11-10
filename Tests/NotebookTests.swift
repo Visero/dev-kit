@@ -85,8 +85,8 @@ struct NotebookTests {
             view.string=t;view.setSelectedRange(NSRange(location:t.utf16.count,length:0));coordinator.parent.sourceMode=false;coordinator.render()
             check("edge render source",view.string==t)
         }
-        check("default tools",ToolPage.defaultOrder == [.clock,.diff,.json,.notes,.reader])
-        check("order migration",ToolPage.migratedOrder(["json","epoch","clock","diff","json","unknown"]) == [.json,.clock,.diff,.notes,.reader])
+        check("default tools",ToolPage.defaultOrder == [.clock,.diff,.json,.notes,.reader,.stocks])
+        check("order migration",ToolPage.migratedOrder(["json","epoch","clock","diff","json","unknown"]) == [.json,.clock,.diff,.notes,.reader,.stocks])
         check("time name",ToolPage.clock.title=="时间中心")
         print("PASS: \(count) notebook/Markdown/navigation assertions")
     }

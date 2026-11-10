@@ -59,6 +59,7 @@ xcrun swiftc -swift-version 5 -O -DBUILD_TEST \
   "$ROOT/Sources/SyncCore.swift" "$ROOT/Sources/CloudSync.swift" \
   "$ROOT/Sources/CodeReaderCore.swift" "$ROOT/Sources/CodeReader.swift" \
   "$ROOT/Sources/VimSupport.swift" "$ROOT/Sources/CodeDefaults.swift" \
+  "$ROOT/Sources/Stocks.swift" "$ROOT/Sources/StocksUI.swift" \
   "$ROOT/Tests/StoreIntegrationTests.swift" \
   -framework SwiftUI -framework AppKit \
   -o "$ROOT/build/store-integration-tests"
@@ -81,6 +82,12 @@ xcrun swiftc -swift-version 5 -O \
   "$ROOT/Tests/CodeReaderTests.swift" \
   -framework SwiftUI -framework AppKit -o "$ROOT/build/code-reader-tests"
 "$ROOT/build/code-reader-tests"
+
+printf '\n=== Stock quote tests ===\n'
+xcrun swiftc -swift-version 5 -O \
+  "$ROOT/Sources/Stocks.swift" "$ROOT/Tests/StocksTests.swift" \
+  -o "$ROOT/build/stock-tests"
+"$ROOT/build/stock-tests"
 
 printf '\n=== Notebook / Markdown tests ===\n'
 xcrun swiftc -swift-version 5 -O -DBUILD_TEST \

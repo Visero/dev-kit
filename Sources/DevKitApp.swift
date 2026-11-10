@@ -45,7 +45,7 @@ struct DevKitApp: App {
 #endif
 
 enum ToolPage: String, CaseIterable, Identifiable, Sendable {
-    case clock, diff, json, notes, reader
+    case clock, diff, json, notes, reader, stocks
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -53,6 +53,7 @@ enum ToolPage: String, CaseIterable, Identifiable, Sendable {
         case .json: return "代码格式化"
         case .notes: return "记事本"
         case .reader: return "代码阅读器"
+        case .stocks: return "实时指标"
         case .clock: return "时间中心"
         }
     }
@@ -62,6 +63,7 @@ enum ToolPage: String, CaseIterable, Identifiable, Sendable {
         case .json: return "curlybraces"
         case .notes: return "note.text"
         case .reader: return "doc.text.magnifyingglass"
+        case .stocks: return "chart.line.uptrend.xyaxis"
         case .clock: return "clock"
         }
     }
@@ -71,6 +73,7 @@ enum ToolPage: String, CaseIterable, Identifiable, Sendable {
         case .json: return "自动识别并格式化多种语言代码，仅在本地运行。"
         case .notes: return "用 Markdown 记录灵感，笔记自动保存在本机。"
         case .reader: return "在独立窗口阅读与编辑代码，保留行号和语法高亮。"
+        case .stocks: return "自选股票与指数的实时行情，直接在你的本机刷新。"
         case .clock: return "世界时钟、下班倒计时与 Unix 时间戳转换。"
         }
     }
@@ -80,10 +83,11 @@ enum ToolPage: String, CaseIterable, Identifiable, Sendable {
         case .json: return "FORMAT"
         case .notes: return "NOTEBOOK"
         case .reader: return "CODE READER"
+        case .stocks: return "MARKET"
         case .clock: return "TIME CENTER"
         }
     }
-    static let defaultOrder: [ToolPage] = [.clock, .diff, .json, .notes, .reader]
+    static let defaultOrder: [ToolPage] = [.clock, .diff, .json, .notes, .reader, .stocks]
     static func migratedOrder(_ saved:[String]) -> [ToolPage] {
         // Keep the clock's existing position; epoch is retired, not a second time page.
         var result:[ToolPage]=[]
@@ -128,12 +132,14 @@ final class ToolkitStore: ObservableObject {
         ToolPage.migratedOrder(UserDefaults.standard.stringArray(forKey:"DevKit.toolOrder") ?? [])
     }
     let notebook: NotebookStore
+    let stocks: StockBoard
     let sync: CloudSyncEngine
     private var cancellable: Any?
     init(notebookDirectory:URL?=nil, scheduleDefaults: UserDefaults = .standard) {
         self.scheduleDefaults = scheduleDefaults
         workWeekSchedule = WorkSchedulePreferences.load(from: scheduleDefaults)
         notebook=NotebookStore(directory:notebookDirectory ?? NotebookDisk.directory)
+        stocks=StockBoard(defaults:scheduleDefaults)
         sync=CloudSyncEngine(defaults: scheduleDefaults)
         isLoadingDraft = true
         let draft = CodeDraftStore.load()
@@ -477,6 +483,7 @@ struct RootView: View {
                     case .notes: NotebookPage(notes:store.notebook)
                     case .reader: CodeReaderPage(manager:CodeReaderManager.shared)
                     case .clock: ClockPage(store:store)
+                    case .stocks: StockPage(board:store.stocks)
                     }
                 }.padding(.horizontal,28).padding(.bottom,compactDetailTop ? 14 : 24)
             }.background(Color(nsColor:.windowBackgroundColor))
