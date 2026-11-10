@@ -306,12 +306,46 @@ final class CodeReaderManager: ObservableObject {
 }
 
 final class DevKitAppDelegate: NSObject, NSApplicationDelegate {
+    private var launchTime = Date()
+    private var pendingLaunchFileOpen = false
+    private var hiddenMainWindow: NSWindow?
+
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        launchTime = Date()
+    }
     func application(_ sender: NSApplication, openFiles filenames: [String]) {
         let success = filenames.map { CodeReaderManager.shared.open(URL(fileURLWithPath:$0)) }.allSatisfy { $0 }
         sender.reply(toOpenOrPrint:success ? .success : .failure)
+        noteLaunchFileOpen()
     }
     func application(_ application: NSApplication, open urls: [URL]) {
         urls.filter(\.isFileURL).forEach { _ = CodeReaderManager.shared.open($0) }
+        noteLaunchFileOpen()
+    }
+    /// 从 Finder 打开文件时，SwiftUI 的 WindowGroup 也会照常创建主窗口，
+    /// 于是读者窗口旁边多出一个没人用的主窗口。启动瞬间的文件打开请求记为
+    /// 「启动即打开文件」，等窗口都建好后再把主窗口收起来。
+    private func noteLaunchFileOpen() {
+        guard Date().timeIntervalSince(launchTime) < 3 else { return }
+        pendingLaunchFileOpen = true
+        DispatchQueue.main.asyncAfter(deadline:.now()+0.45) { [weak self] in
+            guard let self, self.pendingLaunchFileOpen else { return }
+            self.pendingLaunchFileOpen = false
+            self.hideLaunchMainWindow()
+        }
+    }
+    private func hideLaunchMainWindow() {
+        guard let window = NSApp.windows.first(where:{ $0.title == "DevKit · 开发工具箱" }) else { return }
+        window.orderOut(nil)
+        hiddenMainWindow = window
+    }
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        guard !flag else { return true }
+        if let window = hiddenMainWindow ?? NSApp.windows.first(where:{ $0.title == "DevKit · 开发工具箱" }) {
+            hiddenMainWindow = nil
+            window.makeKeyAndOrderFront(nil)
+        }
+        return true
     }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         let dirty = NSDocumentController.shared.documents.compactMap { $0 as? CodeReaderDocument }.filter(\.isDocumentEdited)
