@@ -468,8 +468,19 @@ final class StockBoard: ObservableObject {
     static let watchlistKey = "DevKit.stockWatchlist"
     static let intervalKey = "DevKit.stockRefreshInterval"
     static let intervalOptions = [5, 10, 30, 60, 300]
-    static let defaultSymbols = ["sh000001", "sz399001", "sh600519", "hk00700", "usAAPL"]
+    static let defaultSymbols = [
+        "sh000001", "sz399001", "sz399006", "sh000300", "sh600519",
+        "hkHSI", "hkHSTECH", "hk00700",
+        "us.DJI", "us.IXIC", "us.INX", "usAAPL"
+    ]
+    /// What 1.6.7 shipped as the factory list. A stored value equal to this
+    /// means the user never edited the watchlist, so it is safe to upgrade to
+    /// the wider default that now carries the major indices.
+    static let legacyDefaultSymbols = ["sh000001", "sz399001", "sh600519", "hk00700", "usAAPL"]
     static let defaultInterval = 10
+    static let fontScaleKey = "DevKit.stockFontScale"
+    static let fontScaleOptions: [Double] = [0.9, 1.0, 1.15, 1.3, 1.5]
+    static let defaultZoomStep = 1
 
     @Published private(set) var symbols: [String]
     @Published private(set) var quotes: [String: StockQuote] = [:]
@@ -491,6 +502,26 @@ final class StockBoard: ObservableObject {
     @Published var isEditing = false
     @Published var editDraft = ""
     @Published var editNote = ""
+    @Published var zoomStep: Int {
+        didSet {
+            guard (0..<Self.fontScaleOptions.count).contains(zoomStep) else {
+                zoomStep = Self.defaultZoomStep
+                return
+            }
+            defaults.set(zoomStep, forKey: Self.fontScaleKey)
+        }
+    }
+
+    var fontScale: CGFloat {
+        CGFloat(Self.fontScaleOptions[min(max(zoomStep, 0), Self.fontScaleOptions.count - 1)])
+    }
+
+    var canZoomIn: Bool { zoomStep < Self.fontScaleOptions.count - 1 }
+    var canZoomOut: Bool { zoomStep > 0 }
+
+    func zoomIn() { if canZoomIn { zoomStep += 1 } }
+    func zoomOut() { if canZoomOut { zoomStep -= 1 } }
+    func resetZoom() { zoomStep = Self.defaultZoomStep }
 
     private let defaults: UserDefaults
     private var timer: Timer?
@@ -499,10 +530,17 @@ final class StockBoard: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        let saved = defaults.stringArray(forKey: Self.watchlistKey) ?? Self.defaultSymbols
+        var saved = defaults.stringArray(forKey: Self.watchlistKey) ?? Self.defaultSymbols
+        if saved == Self.legacyDefaultSymbols {
+            saved = Self.defaultSymbols
+            defaults.set(saved, forKey: Self.watchlistKey)
+        }
         symbols = saved.isEmpty ? [] : saved
         let savedInterval = defaults.integer(forKey: Self.intervalKey)
         interval = Self.intervalOptions.contains(savedInterval) ? savedInterval : Self.defaultInterval
+        let savedZoom = defaults.object(forKey: Self.fontScaleKey) as? Int
+        zoomStep = (savedZoom.flatMap { (0..<Self.fontScaleOptions.count).contains($0) ? $0 : nil })
+            ?? Self.defaultZoomStep
         phases = [:]
     }
 

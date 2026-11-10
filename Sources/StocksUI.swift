@@ -51,7 +51,7 @@ struct StockPage: View {
 
             HStack(alignment:.top, spacing:12) {
                 ForEach(StockMarketKind.allCases) { market in
-                    StockColumn(market: market, board: board)
+                    StockColumn(market: market, board: board, scale: board.fontScale)
                 }
             }
             .frame(maxHeight:.infinity)
@@ -92,6 +92,26 @@ struct StockPage: View {
             .accessibilityLabel("添加自选")
 
             Spacer(minLength:8)
+
+            HStack(spacing:3) {
+                Button { board.zoomOut() } label: {
+                    Text("A−").font(.system(size:10,weight:.semibold,design:.monospaced))
+                        .frame(width:16,height:16)
+                }
+                .buttonStyle(.borderless)
+                .disabled(!board.canZoomOut)
+                .help("缩小行情字号")
+                .accessibilityLabel("缩小行情字号")
+
+                Button { board.zoomIn() } label: {
+                    Text("A+").font(.system(size:11.5,weight:.semibold,design:.monospaced))
+                        .frame(width:16,height:16)
+                }
+                .buttonStyle(.borderless)
+                .disabled(!board.canZoomIn)
+                .help("放大行情字号")
+                .accessibilityLabel("放大行情字号")
+            }
 
             Button { board.beginEdit() } label: {
                 Label("批量编辑",systemImage:"slider.horizontal.3").font(.system(size:11))
@@ -172,6 +192,7 @@ final class StockPageState: ObservableObject {
 private struct StockColumn: View {
     let market: StockMarketKind
     @ObservedObject var board: StockBoard
+    let scale: CGFloat
 
     var body: some View {
         let symbols = board.symbols(in: market)
@@ -179,34 +200,35 @@ private struct StockColumn: View {
         Panel {
             VStack(spacing:0) {
                 HStack(spacing:5) {
-                    Text(market.rawValue).font(.system(size:11,weight:.semibold))
+                    Text(market.rawValue).font(.system(size:11 * scale,weight:.semibold))
                     Text("\(symbols.count)")
-                        .font(.system(size:9,design:.monospaced)).foregroundStyle(.tertiary)
+                        .font(.system(size:9 * scale,design:.monospaced)).foregroundStyle(.tertiary)
                     Spacer(minLength:0)
                     Circle().fill(phase.isLive ? Color.teal.opacity(0.85) : Color.secondary.opacity(0.45))
                         .frame(width:5,height:5)
-                    Text(phase.rawValue).font(.system(size:9.5))
+                    Text(phase.rawValue).font(.system(size:9.5 * scale))
                         .foregroundStyle(phase.isLive ? Color.teal : Color.secondary)
                 }
-                .padding(.horizontal,12).padding(.top,10).padding(.bottom,8)
+                .padding(.horizontal,12 * scale).padding(.top,10).padding(.bottom,8)
                 .help("按该交易所本地时间判断盘中 / 午间休市 / 已收盘；不区分法定节假日")
 
                 Divider().opacity(0.5)
 
                 if symbols.isEmpty {
                     VStack(spacing:5) {
-                        Text("暂无自选").font(.system(size:10.5)).foregroundStyle(.tertiary)
-                        Text(market.hint).font(.system(size:9.5)).foregroundStyle(.tertiary)
+                        Text("暂无自选").font(.system(size:10.5 * scale)).foregroundStyle(.tertiary)
+                        Text(market.hint).font(.system(size:9.5 * scale)).foregroundStyle(.tertiary)
                     }
                     .frame(maxWidth:.infinity,maxHeight:.infinity).padding(.vertical,24)
                 } else {
                     ScrollView {
                         LazyVStack(spacing:0) {
                             ForEach(Array(symbols.enumerated()), id:\.element) { index, symbol in
-                                if index > 0 { Divider().padding(.leading,12) }
+                                if index > 0 { Divider().padding(.leading,12 * scale) }
                                 StockRow(
                                     symbol: symbol,
                                     quote: board.quotes[symbol],
+                                    scale: scale,
                                     onRemove: { board.remove(symbol) },
                                     onMoveTop: { board.moveToTop(symbol) }
                                 )
@@ -224,6 +246,7 @@ private struct StockColumn: View {
 private struct StockRow: View {
     let symbol: String
     let quote: StockQuote?
+    let scale: CGFloat
     let onRemove: () -> Void
     let onMoveTop: () -> Void
     @StateObject private var state = RowState()
@@ -235,33 +258,38 @@ private struct StockRow: View {
         return .secondary
     }
 
+    /// Secondary annotations grow slower than the name and price: at the top
+    /// zoom steps they would otherwise crowd the price column and truncate.
+    private var secondaryScale: CGFloat { min(scale, 1.25) }
+    private var annotationScale: CGFloat { min(scale, 1.3) }
+
     var body: some View {
-        VStack(spacing:5) {
-            HStack(spacing:6) {
-                VStack(alignment:.leading,spacing:2) {
+        VStack(spacing:5 * scale) {
+            HStack(spacing:6 * scale) {
+                VStack(alignment:.leading,spacing:2 * scale) {
                     HStack(spacing:4) {
                         Text(quote?.name ?? "加载中…")
-                            .font(.system(size:11.5,weight:.semibold)).lineLimit(1)
+                            .font(.system(size:11.5 * scale,weight:.semibold)).lineLimit(1)
                         if quote?.isIndex == true {
-                            Text("指数").font(.system(size:8)).foregroundStyle(.tertiary)
+                            Text("指数").font(.system(size:8 * scale)).foregroundStyle(.tertiary)
                                 .padding(.horizontal,3)
                                 .background(Color.primary.opacity(0.06),in:Capsule())
                                 .fixedSize()
                         }
                     }
-                    Text(secondaryLine).font(.system(size:9,design:.monospaced)).foregroundStyle(.tertiary).lineLimit(1)
+                    Text(secondaryLine).font(.system(size:9 * secondaryScale,design:.monospaced)).foregroundStyle(.tertiary).lineLimit(1)
                 }
                 Spacer(minLength:4)
                 VStack(alignment:.trailing,spacing:1) {
                     Text(quote.map { StockFormat.price($0.price) } ?? "—")
-                        .font(.system(size:12.5,weight:.semibold,design:.rounded))
+                        .font(.system(size:12.5 * scale,weight:.semibold,design:.rounded))
                         .monospacedDigit().foregroundStyle(tint).lineLimit(1)
-                    Text(changeLine).font(.system(size:9,design:.monospaced)).monospacedDigit()
+                    Text(changeLine).font(.system(size:9 * annotationScale,design:.monospaced)).monospacedDigit()
                         .foregroundStyle(quote?.hasPrice == true ? tint.opacity(0.72) : Color.secondary.opacity(0.55))
                         .lineLimit(1)
                 }
                 Button(action:onRemove) {
-                    Image(systemName:"trash").font(.system(size:10)).foregroundStyle(.secondary)
+                    Image(systemName:"trash").font(.system(size:10 * scale)).foregroundStyle(.secondary)
                         .frame(width:12,height:14)
                 }
                 .buttonStyle(.plain)
@@ -271,7 +299,7 @@ private struct StockRow: View {
             }
             StockRangeBar(quote: quote, tint: tint)
         }
-        .padding(.horizontal,12).padding(.vertical,7)
+        .padding(.horizontal,12 * scale).padding(.vertical,7 * scale)
         .background(state.hovered ? Color.primary.opacity(0.035) : Color.clear)
         .contentShape(Rectangle())
         .onHover { state.hovered = $0 }
@@ -289,7 +317,9 @@ private struct StockRow: View {
         guard let quote = quote else { return symbol.uppercased() }
         var parts = [quote.displaySymbol]
         if quote.open > 0 { parts.append("开 \(StockFormat.price(quote.open))") }
-        if quote.prevClose > 0 { parts.append("昨 \(StockFormat.price(quote.prevClose))") }
+        // The 昨收 tick is the first thing to go once the type grows: at the top
+        // zoom steps it would push the line past the column width.
+        if quote.prevClose > 0, scale <= 1.17 { parts.append("昨 \(StockFormat.price(quote.prevClose))") }
         return parts.joined(separator:"  ")
     }
 

@@ -289,6 +289,18 @@ struct StocksTests {
         check("defaults cover three markets", Set(board.symbols.compactMap(StockMarketKind.kind(of:)))
               == Set([StockMarketKind.aShare, .hk, .us]))
         check("default interval", board.interval == 10)
+        check("defaults carry the A-share majors",
+              ["sh000001", "sz399001", "sz399006", "sh000300"].allSatisfy(board.symbols.contains))
+        check("defaults carry the HK indices",
+              ["hkHSI", "hkHSTECH"].allSatisfy(board.symbols.contains))
+        check("defaults carry the US indices",
+              ["us.DJI", "us.IXIC", "us.INX"].allSatisfy(board.symbols.contains))
+        check("defaults keep one stock per market",
+              ["sh600519", "hk00700", "usAAPL"].allSatisfy(board.symbols.contains))
+        check("default watchlist has no duplicates", Set(StockBoard.defaultSymbols).count == StockBoard.defaultSymbols.count)
+        check("default indices parse as indices",
+              StockParser.isIndex(symbol: "sh000300") && StockParser.isIndex(symbol: "sz399006")
+              && StockParser.isIndex(symbol: "hkHSI") && StockParser.isIndex(symbol: "us.IXIC"))
         board.add("600519")
         check("duplicate add is rejected", board.error.contains("已经在自选"))
         board.add(symbol: "sz000002")
@@ -311,6 +323,23 @@ struct StocksTests {
         board.interval = 45
         check("interval clamps to a supported value", board.interval == 10)
         check("rejected interval persists the sanitized value", defaults.integer(forKey: StockBoard.intervalKey) == 10)
+
+        // MARK: - Font zoom contract
+        check("zoom starts at 1.0", board.fontScale == 1.0 && board.zoomStep == StockBoard.defaultZoomStep)
+        board.zoomIn()
+        check("zoom in steps up", board.fontScale == 1.15 && board.zoomStep == 2)
+        check("zoom step persisted", defaults.integer(forKey: StockBoard.fontScaleKey) == 2)
+        board.zoomOut(); board.zoomOut()
+        check("zoom out steps down", board.fontScale == 0.9 && board.zoomStep == 0)
+        check("zoom out stops at the floor", { board.zoomOut(); return board.zoomStep }() == 0)
+        board.zoomIn(); board.zoomIn(); board.zoomIn(); board.zoomIn()
+        check("zoom in stops at the ceiling", board.zoomStep == StockBoard.fontScaleOptions.count - 1
+              && board.fontScale == 1.5)
+        board.resetZoom()
+        check("zoom resets to 1.0", board.fontScale == 1.0)
+        defaults.set(9, forKey: StockBoard.fontScaleKey)
+        let zoomBoard = StockBoard(defaults: defaults)
+        check("out-of-range stored zoom falls back", zoomBoard.zoomStep == StockBoard.defaultZoomStep)
 
         // MARK: - Batch edit contract
         board.beginEdit()
@@ -336,6 +365,18 @@ struct StocksTests {
         board.add("茅台")
         check("name input asks for search", board.error.contains("A股 6 位"))
         board.stop()
+
+        // MARK: - Watchlist migration contract
+        let legacySuite = "DevKit.stocks.tests.\(UUID().uuidString)"
+        let legacyDefaults = UserDefaults(suiteName: legacySuite)!
+        legacyDefaults.removePersistentDomain(forName: legacySuite)
+        legacyDefaults.set(StockBoard.legacyDefaultSymbols, forKey: StockBoard.watchlistKey)
+        let migrated = StockBoard(defaults: legacyDefaults)
+        check("untouched legacy list upgrades", migrated.symbols == StockBoard.defaultSymbols)
+        check("upgrade is persisted", legacyDefaults.stringArray(forKey: StockBoard.watchlistKey) == StockBoard.defaultSymbols)
+        legacyDefaults.set(["sh600519", "hk00700"], forKey: StockBoard.watchlistKey)
+        let custom = StockBoard(defaults: legacyDefaults)
+        check("edited list is left alone", custom.symbols == ["sh600519", "hk00700"])
 
         print("PASS: \(passed) stock quote assertions")
     }
